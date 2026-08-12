@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dl0ko5mdte64s"]
+
+[ext_resource type="Script" uid="uid://c4ctewyqxvwpb" path="res://addons/mapgenerator/CellConstructor/cell_constructor.gd" id="1_m2g77"]
+
+[node name="CellConstructor" type="MarginContainer" unique_id=1584417655]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_m2g77")
+
+[node name="GridContainer" type="GridContainer" parent="." unique_id=1483288570]
+layout_mode = 2
+theme_override_constants/h_separation = -1
+theme_override_constants/v_separation = -1
+columns = 5
