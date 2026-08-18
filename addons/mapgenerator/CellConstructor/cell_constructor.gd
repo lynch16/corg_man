@@ -10,7 +10,10 @@ var grid: GridContainer;
 
 func _enter_tree() -> void:
 	grid = $GridContainer;
+	_generate_cells();
+	_add_required_tiles();
 
+func _generate_cells() -> void:
 	for x in range(X_CELLS):
 		for y in range(Y_CELLS):
 			var new_cell = CellButton.new();
@@ -19,3 +22,9 @@ func _enter_tree() -> void:
 			new_cell.custom_minimum_size = size;
 			new_cell.coordinates = Vector2i(x, y);
 			grid.add_child(new_cell);
+
+func _add_tile(tile_cells: Vector2i) -> void:
+	pass;
+
+func _add_required_tiles() -> void:
+	pass;
