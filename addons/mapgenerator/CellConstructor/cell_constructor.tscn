@@ -1,9 +1,8 @@
-[gd_scene format=3 uid="uid://dl0ko5mdte64s"]
+[gd_scene format=3 uid="uid://dsg0q4guxa7id"]
 
-[ext_resource type="Script" uid="uid://c4ctewyqxvwpb" path="res://addons/mapgenerator/CellConstructor/cell_constructor.gd" id="1_m2g77"]
+[ext_resource type="Script" path="res://addons/mapgenerator/CellConstructor/cell_constructor.gd" id="1_m2g77"]
 
 [node name="CellConstructor" type="MarginContainer" unique_id=1584417655]
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2

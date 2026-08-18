@@ -1,9 +1,9 @@
 extends CenterContainer
 
-var generator: MapGenerator;
+var generator: CellGenerator;
 
 func _ready() -> void:
-	generator = MapGenerator.new();
+	generator = CellGenerator.new();
 	generator.run();
 
 func _process(delta: float) -> void:
@@ -16,44 +16,44 @@ func _draw_cells() -> void:
 	var line_color := Color.RED;
 	var draw_scale := 40;
 
-	for y in generator.max_rows:
+	for y in generator.num_rows:
 		draw_line(
 			Vector2(0, y * draw_scale),
-			Vector2(generator.max_columns * draw_scale, y * draw_scale),
+			Vector2(generator.num_columns * draw_scale, y * draw_scale),
 			Color.DIM_GRAY
 		);
 	
-	for x in generator.max_columns:
+	for x in generator.num_columns:
 		draw_line(
 			Vector2(x * draw_scale, 0),
-			Vector2(x * draw_scale, generator.max_rows * draw_scale),
+			Vector2(x * draw_scale, generator.num_rows * draw_scale),
 			Color.DIM_GRAY
 		);
 
-	for i in range(generator.max_columns * generator.max_rows):
+	for i in range(generator.num_columns * generator.num_rows):
 		var cell := generator.cells[i];
-		var x := i % generator.max_columns;
-		var y = floor(i / generator.max_columns);
+		var x := i % generator.num_columns;
+		var y = floor(i / generator.num_columns);
 
-		if (!cell.connect[MapGenerator.UP]):
+		if (!cell.connect[CellGenerator.UP]):
 			draw_line(
 				Vector2(x * draw_scale, y * draw_scale), 
 				Vector2(x * draw_scale + draw_scale, y * draw_scale), 
 				line_color
 			);
-		if (!cell.connect[MapGenerator.DOWN]):
+		if (!cell.connect[CellGenerator.DOWN]):
 			draw_line(
 				Vector2(x * draw_scale, y * draw_scale + draw_scale), 
 				Vector2(x * draw_scale + draw_scale, y * draw_scale + draw_scale), 
 				line_color
 			);
-		if (!cell.connect[MapGenerator.LEFT]):
+		if (!cell.connect[CellGenerator.LEFT]):
 			draw_line(
 				Vector2(x * draw_scale, y * draw_scale), 
 				Vector2(x * draw_scale, y * draw_scale + draw_scale), 
 				line_color
 			);
-		if (!cell.connect[MapGenerator.RIGHT]):
+		if (!cell.connect[CellGenerator.RIGHT]):
 			draw_line(
 				Vector2(x * draw_scale + draw_scale, y * draw_scale), 
 				Vector2(x * draw_scale + draw_scale, y * draw_scale + draw_scale), 
