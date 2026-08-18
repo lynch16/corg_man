@@ -86,6 +86,9 @@ func reset_map() -> void:
 
 
 func generate_map() -> void:
+	var next_direction: int = -1;
+	var next_cell: BaseCell;
+
 	var num_filled := 1;
 	var num_groups := 0;
 	var long_pieces := 0;
@@ -132,7 +135,6 @@ func generate_map() -> void:
 		else:
 			while (size < max_cell_size):
 				var stop := false;
-				var next_cell: BaseCell;
 
 				if (size == 2):
 					# With a horizontal 2-cell group, try to turn it into a 4-cell "L" group.
@@ -142,8 +144,6 @@ func generate_map() -> void:
 					if (cell.x > 0 && cell.connect[RIGHT] && cell.next[RIGHT] && cell.next[RIGHT].next[RIGHT]):
 						if (long_pieces < max_long_pieces && randf() <= prob_extend_leg_size_2):
 							cell = cell.next[RIGHT].next[RIGHT];
-
-							var next_direction: int = -1;
 
 							var directions := [];
 							directions.resize(4);
@@ -161,16 +161,13 @@ func generate_map() -> void:
 							elif (directions[DOWN]):
 								next_direction = DOWN;
 							
-							# TODO: This never gets reached ################
 							if (next_direction >= 0):
 								_connect_cell(cell, LEFT);
 								_fill_cell(cell, num_filled, num_groups);
-								print("FILL: ", num_filled);
 								num_filled += 1;
 								_connect_cell(cell, next_direction);
 								_fill_cell(cell.next[next_direction], num_filled, num_groups);
 								num_filled += 1;
-								print("FILL: ", num_filled);
 
 								long_pieces += 1;
 								size += 2;
@@ -178,26 +175,26 @@ func generate_map() -> void:
 
 				if (!stop):
 					# find available open adjacent cells.
-					var open_cell_directions := _get_open_surrounding_cell_directions(random_cell);
+					var open_cell_directions := _get_open_surrounding_cell_directions(random_cell, next_direction, size);
 
 					# if no open cells found from center point, then use the last cell as the new center
 					# but only do this if we are of length 2 to prevent numerous short pieces.
 					# then recalculate the open adjacent cells.
 					if (open_cell_directions.size() == 0 && size == 2):
-						random_cell = next_cell;
-						open_cell_directions = _get_open_surrounding_cell_directions(random_cell);
+							random_cell = next_cell;
+							open_cell_directions = _get_open_surrounding_cell_directions(random_cell, next_direction, size);
 
 					# no more adjacent cells, so stop growing this piece.
 					if (open_cell_directions.size() == 0):
 						stop = true;
 					else:
 						# choose a random valid direction to grow.
-						var next_direction_cell := open_cell_directions[randi() % open_cell_directions.size()];
-						next_cell = random_cell.next[next_direction_cell];
+						next_direction = open_cell_directions[randi() % open_cell_directions.size()];
+						next_cell = random_cell.next[next_direction];
 						
 						# connect the cell to the new cell. Fill it and increase count size.
-						_connect_cell(random_cell, next_direction_cell);
-						_fill_cell(random_cell, num_filled, num_groups);
+						_connect_cell(random_cell, next_direction);
+						_fill_cell(next_cell, num_filled, num_groups);
 						num_filled += 1;
 						size += 1;
 
@@ -211,7 +208,7 @@ func generate_map() -> void:
 
 				if (stop):
 					if (size == 1):
-						print_debug("How did I get here?");
+						print_debug("Error: Called stop after one cell");
 					elif (size == 2):
 						# With a vertical 2-cell group, attach to the right wall if adjacent.
 						var c := first_cell;
@@ -231,10 +228,10 @@ func generate_map() -> void:
 									directions.append(i);
 
 							if (directions.size() > 0):
-								var next_direction = directions[randi() % directions.size()];
-								var next_c := random_cell.next[next_direction];
-								_connect_cell(next_c, next_direction);
-								_fill_cell(next_c.next[next_direction], num_filled, num_groups);
+								var random_dir = directions[randi() % directions.size()];
+								var next_c := random_cell.next[random_dir];
+								_connect_cell(next_c, random_dir);
+								_fill_cell(next_c.next[random_dir], num_filled, num_groups);
 								num_filled += 1;
 								long_pieces += 1;
 
@@ -248,11 +245,9 @@ func _fill_cell(cell: BaseCell, cell_number: int, group_number: int) -> void:
 	cell.group_id = group_number;
 
 func _test_cell_gen() -> bool:
-	print("TEST")
 	# Ensure solid top right corner
 	var cell := cells[4];
 	if (cell.connect[UP] || cell.connect[RIGHT]):
-		print("FAIL TOP RIGHT");
 		return false;
 
 	# Ensure solid bottom right corner
@@ -262,14 +257,14 @@ func _test_cell_gen() -> bool:
 
 	# Ensure there are no two stacked/side-by-side 2-cell pieces.
 	var is_horiz_cell = func(x: int, y: int) -> bool:
-		var q1 := cells[x + y * max_columns].connect;
-		var q2 := cells[ x + 1 + y * max_columns].connect;
+		var q1 := cells[x + (y * max_columns)].connect;
+		var q2 := cells[(x + 1) + (y * max_columns)].connect;
 		return !q1[UP] && !q1[DOWN] && (x == 0 || !q1[LEFT]) && q1[RIGHT] && \
 				!q2[UP] && !q2[DOWN] && q2[LEFT] && !q2[RIGHT];
 
 	var is_vert_cell = func(x: int, y: int) -> bool:
-		var q1 := cells[x + y * max_columns].connect;
-		var q2 := cells[x + (y + 1) * max_columns].connect;
+		var q1 := cells[x + (y * max_columns)].connect;
+		var q2 := cells[x + ((y + 1) * max_columns)].connect;
 		if (x == max_columns - 1):
 			# Special case (we can consider two single cells as vertical at the right edge)
 			return !q1[LEFT] && !q1[UP] && !q1[DOWN] && \
@@ -279,8 +274,8 @@ func _test_cell_gen() -> bool:
 			   !q2[LEFT] && !q2[RIGHT] && q2[UP] && !q2[DOWN];
 
 	var group: int;
-	for y in range(max_rows):
-		for x in range(max_columns):
+	for y in range(max_rows - 1):
+		for x in range(max_columns - 1):
 			if (
 				(is_horiz_cell.call(x, y) && is_horiz_cell.call(x, y + 1)) ||
 				(is_vert_cell.call(x, y) && is_vert_cell.call(x + 1, y))
@@ -293,19 +288,19 @@ func _test_cell_gen() -> bool:
 				# Join the four cells to create a square.
 				cells[x + y * max_columns].connect[DOWN] = true;
 				cells[x + y * max_columns].connect[RIGHT] = true;
-				group = cells[x + y * max_columns].group;
+				group = cells[x + y * max_columns].group_id;
 
 				cells[x + 1 + y * max_columns].connect[DOWN] = true;
 				cells[x + 1 + y * max_columns].connect[LEFT] = true;
-				cells[x + 1 + y * max_columns].group = group;
+				cells[x + 1 + y * max_columns].group_id = group;
 
 				cells[x + (y + 1) * max_columns].connect[UP] = true;
 				cells[x + (y + 1) * max_columns].connect[RIGHT] = true;
-				cells[x + (y + 1) * max_columns].group = group;
+				cells[x + (y + 1) * max_columns].group_id = group;
 
 				cells[x + 1 + (y + 1) * max_columns].connect[UP] = true;
 				cells[x + 1 + (y + 1) * max_columns].connect[LEFT] = true;
-				cells[x + 1 + (y + 1) * max_columns].group = group;
+				cells[x + 1 + (y + 1) * max_columns].group_id = group;
 
 	return true;
 
@@ -328,20 +323,18 @@ func _is_open_cell(
 	cell: BaseCell,
 	direction_to_check: int, # UP, RIGHT, DOWN, LEFT
 	# TODO: Prevent long straight peices of length 3
-	# previous_direction: int = -1, # UP, RIGHT, DOWN, LEFT
-	# cell_group_size: int = 0
+	previous_direction: int = -1, # UP, RIGHT, DOWN, LEFT
+	cell_group_size: int = 0
 ) -> bool:
 	# Dont create cell's through required starting position (wall)
 	if ((cell.y == 6 && cell.x == 0 && direction_to_check == DOWN) ||
 		(cell.y == 7 && cell.x == 0 && direction_to_check == UP)):
 		return false;
 
-	# TODO
-	# if (size == 2 && (i==prevDir || (i+2)%4==prevDir)):
-	# 	return false;
+	if (cell_group_size == 2 && (direction_to_check == previous_direction || (direction_to_check + 2) % 4 == previous_direction)):
+		return false;
 
 	if (cell.next[direction_to_check] && !cell.next[direction_to_check].filled):
-		
 		if (cell.next[direction_to_check].next[LEFT] && !cell.next[direction_to_check].next[LEFT].filled):
 			pass;
 		else:
@@ -350,13 +343,15 @@ func _is_open_cell(
 	return false;
 
 func _get_open_surrounding_cell_directions(
-	center_cell: BaseCell
+	center_cell: BaseCell,
+	previous_direction: int,
+	size: int,
 ) -> Array[int]:
 	var open_cell_directions: Array[int] = [];
 
 	# range is 4 for the cardinal directions
 	for direction in range(4):
-		if (_is_open_cell(center_cell, direction)):
+		if (_is_open_cell(center_cell, direction, previous_direction, size)):
 			open_cell_directions.append(direction);
 
 	return open_cell_directions;
