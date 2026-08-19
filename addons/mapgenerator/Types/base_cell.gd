@@ -8,8 +8,18 @@ var y: int;
 var connect: Array[bool];
 var next: Array[BaseCell];
 
+var is_tunnel: bool;
+var dead_end_direction: int;
+
+var debug := {
+	is_edge_tunnel_candidate = false,
+	is_void_tunnel_candidate = false,
+	is_single_dead_end_candidate = false,
+	is_double_dead_end_candidate = false,
+}
+
 # TOOD
-# @export var is_raise_heigh_candidate: bool;
+# @export var is_raise_height_candidate: bool;
 
 func _init(
 	p_x: int = -1,

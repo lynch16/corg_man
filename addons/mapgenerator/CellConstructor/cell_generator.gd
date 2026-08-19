@@ -5,8 +5,6 @@ const RIGHT = 1;
 const DOWN = 2;
 const LEFT = 3;
 
-
-
 var prob_stop_growing_at_size := [ # probability of stopping growth at sizes...
 	0,     # size 0
 	0,     # size 1
@@ -18,6 +16,7 @@ var prob_stop_growing_at_size := [ # probability of stopping growth at sizes...
 var prob_top_and_bottom_single_cell_join := 0.35;
 var prob_extend_leg_size_2 := 1.0;
 var prob_extend_leg_size_3_4 := 0.5;
+var prob_insert_two_tunnels := 0.45;
 
 var cells: Array[BaseCell];
 var max_cell_size := 5;
@@ -33,12 +32,15 @@ func run() -> void:
 		reset_map();
 		generate_map();
 		generate_count += 1;
+		if (!_calculate_tunnels()):
+			continue;
+
 		if (!cell_tester.test_cell_gen(num_rows, num_columns, cells)):
 			continue;
 		
 		break;
-	
-	print("TOTAL GENERATED: " + str(generate_count));
+
+	print("GENERATED AFTER: ", generate_count)
 
 func reset_map() -> void:
 	cells.resize(num_rows * num_columns)
@@ -163,6 +165,8 @@ func generate_map() -> void:
 								next_direction = UP;
 							elif (directions[DOWN]):
 								next_direction = DOWN;
+							else:
+								next_direction = -1;
 							
 							if (next_direction >= 0):
 								_connect_cell(cell, LEFT);
@@ -265,7 +269,6 @@ func _get_left_most_empty_cells() -> Array[BaseCell]:
 func _is_open_cell(
 	cell: BaseCell,
 	direction_to_check: int, # UP, RIGHT, DOWN, LEFT
-	# TODO: Prevent long straight peices of length 3
 	previous_direction: int = -1, # UP, RIGHT, DOWN, LEFT
 	cell_group_size: int = 0
 ) -> bool:
@@ -311,3 +314,146 @@ func _connect_cell(
 	# TODO: Check with and without this
 	if (cell.x == 0 && direction == RIGHT):
 		cell.connect[LEFT] = true;
+
+# Create tunnels by converting dead ends or using already available edges
+func _calculate_tunnels() -> bool:
+	var single_dead_end_cells: Array[BaseCell] = [];
+	var top_single_dead_end_cells: Array[BaseCell] = []; # Dead end cell in top 3 rows
+	var bottom_single_dead_end_cells: Array[BaseCell] = []; # Dead end cell in bottom 5 rows
+	var double_dead_end_cells: Array[BaseCell] = []; # Dead end above and below
+
+	var void_tunnel_cells: Array[BaseCell] = [];
+	var top_void_tunnel_cells: Array[BaseCell] = [];
+	var bottom_void_tunnel_cells: Array[BaseCell] = [];
+
+	var edge_tunnel_cells: Array[BaseCell] = [];
+	var top_edge_tunnel_cells: Array[BaseCell] = [];
+	var bottom_edge_tunnel_cells: Array[BaseCell] = [];
+
+	var num_tunnels_created := 0;
+
+	# Prepare data
+	for y in range(num_rows):
+		var cell := cells[num_columns - 1 + y * num_columns];
+
+		# Dont create tunnels if connected vertically
+		if (cell.connect[UP]):
+			continue;
+		
+		# Cell doesn't connect up and within middle rows
+		if (cell.y > 1 && cell.y < num_rows - 2):
+			cell.debug.is_edge_tunnel_candidate = true;
+
+			edge_tunnel_cells.append(cell);
+			if (cell.y <= 2):
+				top_edge_tunnel_cells.append(cell);
+			elif (cell.y >= 5):
+				bottom_edge_tunnel_cells.append(cell);
+
+		var dead_end_up := !cell.next[UP] || cell.next[UP].connect[RIGHT];
+		var dead_end_down := !cell.next[DOWN] || cell.next[DOWN].connect[RIGHT];
+
+		if (cell.connect[RIGHT]):
+			if dead_end_up:
+				cell.debug.is_void_tunnel_candidate = true;
+				void_tunnel_cells.append(cell);
+				if (cell.y <= 2):
+					top_void_tunnel_cells.append(cell);
+				elif (cell.y >= 6):
+					bottom_void_tunnel_cells.append(cell); # TODO: Why are the limits between top and bottom different between tunnel types and not consts
+
+		elif (cell.connect[DOWN]):
+			continue;
+		else:
+			if (dead_end_up != dead_end_down):
+				# TODO: Original checks raise height
+				if (y < num_rows - 1 && cell.next[LEFT].connect[LEFT]):
+					single_dead_end_cells.append(cell);
+					cell.debug.is_single_dead_end_candidate = true;
+					cell.dead_end_direction = UP if dead_end_up else DOWN;
+			elif (dead_end_up && dead_end_down):
+				if (y > 0 && y < num_rows - 1):
+					if (cell.next[LEFT].connect[UP] && cell.next[LEFT].connect[DOWN]):
+						cell.debug.is_double_dead_end_candidate = true;
+						if (cell.y >= 2 && cell.y <= 5):
+							double_dead_end_cells.append(cell);
+
+	# Execute
+	var num_tunnels_target = 2 if randf() < prob_insert_two_tunnels else 1;
+	if (num_tunnels_target == 1):
+		var void_cell := void_tunnel_cells.pick_random() if !void_tunnel_cells.is_empty() else null;
+		var dead_end_cell := single_dead_end_cells.pick_random() if !single_dead_end_cells.is_empty() else null;
+		var edge_cell := edge_tunnel_cells.pick_random() if !edge_tunnel_cells.is_empty() else null;
+
+		if (void_cell):
+			void_cell.is_tunnel = true;
+		elif (dead_end_cell):
+			_update_cell_dead_end(dead_end_cell);
+		elif (edge_cell):
+			edge_cell.is_tunnel = true;
+		else:
+			return false;
+	elif (num_tunnels_target == 2):
+		var double_ended := double_dead_end_cells.pick_random() if !double_dead_end_cells.is_empty() else null;
+		if (double_ended):
+			double_ended.connect[RIGHT] = true;
+			double_ended.is_tunnel = true;
+			double_ended.next[DOWN].is_tunnel = true;
+		else:
+			num_tunnels_created = 1;
+			var top_void_cell := top_void_tunnel_cells.pick_random() if !top_void_tunnel_cells.is_empty() else null;
+			var top_single_cell := top_single_dead_end_cells.pick_random() if !top_single_dead_end_cells.is_empty() else null;
+			var top_edge_cell := top_edge_tunnel_cells.pick_random() if !top_edge_tunnel_cells.is_empty() else null;
+			if (top_void_cell):
+				top_void_cell.is_tunnel = true;
+			elif (top_single_cell):
+				_update_cell_dead_end(top_single_cell);
+			elif (top_edge_cell):
+				top_edge_cell.is_tunnel = true;
+			else:
+				# No valid top tunnels
+				num_tunnels_created = 0;
+
+			var bottom_void_cell := bottom_void_tunnel_cells.pick_random() if !bottom_void_tunnel_cells.is_empty() else null;
+			var bottom_single_cell := bottom_single_dead_end_cells.pick_random() if !bottom_single_dead_end_cells.is_empty() else null;
+			var bottomn_edge_cell := bottom_edge_tunnel_cells.pick_random() if !bottom_edge_tunnel_cells.is_empty() else null;
+			if (bottom_void_cell):
+				bottom_void_cell.is_tunnel = true;
+			elif (bottom_single_cell):
+				_update_cell_dead_end(bottom_single_cell);
+			elif (bottomn_edge_cell):
+				bottomn_edge_cell.is_tunnel = true;
+			else:
+				# If both top and bottom could not produce a valid tunnel, resolve early
+				if (num_tunnels_created == 0):
+					return false;
+
+	return true;
+
+
+func _update_cell_dead_end(cell: BaseCell) -> void:
+	cell.connect[RIGHT] = true;
+	if (cell.dead_end_direction == UP):
+		cell.is_tunnel = true;
+	else:
+		cell.next[DOWN].is_tunnel = true;
+
+
+
+# TODO
+# # Randomly join wall pieces to the boundary to increase difficulty
+# func _join_walls() -> void:
+
+# 	# Join cells to the top boundary
+# 	for x in range(num_columns):
+# 		var cell := cells[x];
+# 		if (!cell.connect[LEFT] && !cell.connect[RIGHT] && !cell.connect[UP] && (
+# 			!cell.connect[DOWN] || !cell.next[DOWN].connect[DOWN]
+# 		)):
+# 			# Ensure it will not create a dead-end
+# 			if (
+# 				(!cell.next[LEFT] || !cell.next[LEFT].connect[UP]) &&
+# 				(cell.next[RIGHT] && !cell.next[RIGHT].connect[UP])
+# 			):
+# 				# Prevent connecting very large piece
+# 				if (!(cell.next[DOWN] && cell.next[DOWN].connect[RIGHT] && cell.next[DOWN].next[RIGHT].connect[RIGHT])):
