@@ -1,0 +1,186 @@
+class_name TileGenerator extends RefCounted
+
+enum TileType {
+	Null = -1,
+	Unassigned = 0,
+	Wall = 1,
+	Pellet = 2,
+	Energizer = 3,
+	Door = 4,
+	Blank = 5,
+}
+
+## Generated cells, upscaled to full size
+var cells: Array[TileCell];
+## Generated Tiles
+var tiles: Array[TileType];
+## Map of tile coordinates to generated cell
+var tile_cells: Array[TileCell];
+## Number of rows used in generation
+var num_rows: int;
+## Number of columns used in generation
+var num_columns: int;
+
+var num_subrows: int;
+var num_subcolumns: int;
+var num_mid_columns: int;
+var num_full_columns: int;
+
+func _init(
+	base_cells: Array[BaseCell] = [],
+	p_num_rows: int = 0,
+	p_num_columns: int = 0
+) -> void:
+	for base_cell in base_cells:
+		cells.append(TileCell.from(base_cell));
+	num_rows = p_num_rows;
+	num_columns = p_num_columns;
+
+	# TODO: Why is the math on these nonsense?
+	num_subrows = num_rows * 3 + 1 + 3;
+	num_subcolumns = num_columns * 3 - 1 + 2;
+	num_mid_columns = num_subcolumns - 2;
+	num_full_columns = num_mid_columns * 2;
+
+func generate() -> void:
+	tiles = [];
+	tiles.resize(num_subrows * num_full_columns);
+	tiles.fill(TileType.Unassigned);
+	
+	tile_cells = [];
+	tile_cells.resize(num_subrows * num_subcolumns);
+	tile_cells.fill(null);
+
+	for i in range(num_rows * num_columns):
+		var cell := cells[i];
+		for x in range(cell.width):
+			for y in range(cell.height):
+				# TODO: Why add 1 to Y
+				_set_tile_cell(cell.x + x, cell.y + 1 + y, cell);
+
+	_set_path_tiles();
+	_extend_tunnels();
+	_fill_walls();
+	_set_ghost_door();
+	_set_energizers();
+	_clean_path_tunnels_and_ghost_house();
+
+func _set_path_tiles() -> void:
+	for y in num_subrows:
+		for x in num_subcolumns:
+			var cell := _get_tile_cell(x, y); 
+			var cell_left := _get_tile_cell(x - 1, y);
+			var cell_up := _get_tile_cell(x, y - 1);
+
+			var valid_left := _cell_valid(cell_left);
+			var valid_up := _cell_valid(cell_up);
+
+			# Set tiles within cell map
+			if (_cell_valid(cell)):
+				if (
+					valid_left && cell.group_id != cell_left.group_id || # Vertical boundary
+					valid_up && cell.group_id != cell_up.group_id || # Horizontal boundary
+					!valid_up && !cell.connect[CellGenerator.UP] # Top Boundary
+				):
+					_set_tile(x, y, TileType.Pellet);
+			else:
+				# Set tiles outside cell map
+				if (
+					valid_left && (!cell_left.connect[CellGenerator.RIGHT] || _get_tile(x - 1, y) == TileType.Pellet) || # Right boundary
+					valid_up && (!cell_up.connect[CellGenerator.DOWN] || _get_tile(x, y - 1) == TileType.Pellet) # Left boundary
+				):
+					_set_tile(x, y, TileType.Pellet);
+
+			# Corner connecting two paths
+			if (
+				_get_tile(x - 1, y) == TileType.Pellet &&
+				_get_tile(x, y - 1) == TileType.Pellet &&
+				_get_tile(x - 1, y - 1) == TileType.Unassigned
+			):
+				_set_tile(x, y, TileType.Pellet);
+
+func _extend_tunnels() -> void:
+	var end_column_cell := cells[num_columns - 1];
+	while (end_column_cell && end_column_cell.id != -1):
+		if (end_column_cell.is_tunnel):
+			var y = end_column_cell.y + 1; # TODO: Why add one to y and rmove 1,2 below
+			_set_tile(num_subcolumns - 1, y, TileType.Pellet);
+			_set_tile(num_subcolumns - 2, y, TileType.Pellet);
+
+		var next_cell_down := end_column_cell.next[CellGenerator.DOWN];
+		if (next_cell_down):
+			end_column_cell = TileCell.from(next_cell_down);
+		else:
+			end_column_cell = null;
+
+func _fill_walls() -> void:
+	for y in range(num_subrows):
+		for x in range(num_subcolumns):
+			# Blank tiles that share vertex with path tiles are walls
+			# Check all tiles in circular pattern (fill in corners)
+			if (_get_tile(x, y) != TileType.Pellet && (
+					_get_tile(x - 1, y) == TileType.Pellet ||
+					_get_tile(x + 1, y) == TileType.Pellet ||
+					_get_tile(x, y - 1) == TileType.Pellet ||
+					_get_tile(x, y + 1) == TileType.Pellet ||
+					_get_tile(x - 1, y - 1) == TileType.Pellet ||
+					_get_tile(x + 1, y - 1) == TileType.Pellet ||
+					_get_tile(x + 1, y + 1) == TileType.Pellet ||
+					_get_tile(x - 1, y + 1) == TileType.Pellet
+			)):
+				_set_tile(x, y, TileType.Wall);
+
+func _set_ghost_door() -> void:
+	# TODO: Make this parametric with generator somehow
+	_set_tile(2, 12, TileType.Door);
+
+func _set_energizers() -> void:
+	pass;
+
+func _clean_path_tunnels_and_ghost_house() -> void:
+	pass;
+
+# Sets tile by applying tile type symetrically around the middle column
+func _set_tile(x: int, y: int, tile_type: TileType) -> void:
+	# Make sure tile is being set in half 
+	if (x < 0 || x > num_subcolumns - 1 || y < 0 || y > num_subrows - 1):
+		return;
+	
+	# TODO: Why -2
+	var normalized_x := x - 2;
+	tiles[num_mid_columns + x + y * num_full_columns] = tile_type;
+	tiles[num_mid_columns - 1 - x + y * num_full_columns] = tile_type;
+
+func _get_tile(x: int, y: int) -> TileType:
+	# Make sure tile is selecting for only half since mirrored
+	if (x < 0 || x > num_subcolumns - 1 || y < 0 || y > num_subrows - 1):
+		return TileType.Null;
+	
+	# TODO: Why -2
+	var normalized_x := x - 2;
+	var index := num_mid_columns + x + y * num_full_columns;
+	if (tiles.has(index)):
+		return tiles[num_mid_columns + x + y * num_full_columns];
+
+	# TODO: This is a workaround
+	return tiles[0];
+
+func _set_tile_cell(x: int, y: int, cell: TileCell) -> void:
+	# Make sure tile cell is being set in half 
+	if (x < 0 || x > num_subcolumns - 1 || y < 0 || y > num_subrows - 1):
+		return;
+	
+	# TODO: Why -2
+	var normalized_x := x - 2;
+	tile_cells[x + y * num_subcolumns] = cell;
+
+func _get_tile_cell(x: int, y: int) -> TileCell:
+	# Make sure tile is selecting for only half since mirrored
+	if (x < 0 || x > num_subcolumns - 1 || y < 0 || y > num_subrows - 1):
+		return TileCell.new();
+	
+	return tile_cells[x + y * num_subcolumns];
+	
+# Need to check IDs instead of null b/c of strict typing
+func _cell_valid(cell: TileCell) -> bool:
+	return cell && cell.id != -1;

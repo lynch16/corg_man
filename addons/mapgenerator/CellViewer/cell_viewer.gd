@@ -1,4 +1,4 @@
-extends CenterContainer
+extends Control
 
 @export var draw_single_dead_end := true;
 @export var single_dead_end_color := Color(255,255,0,0.4);
@@ -19,9 +19,12 @@ extends CenterContainer
 
 var generator: CellGenerator;
 
+signal on_generator_run_complete(p_generator: CellGenerator)
+
 func _ready() -> void:
 	generator = CellGenerator.new();
 	generator.run();
+	on_generator_run_complete.emit(generator);
 
 func _process(delta: float) -> void:
 	queue_redraw();
@@ -31,7 +34,7 @@ func _draw() -> void:
 
 func _draw_cells() -> void:
 	var line_color := Color.RED;
-	var draw_scale := 40;
+	var draw_scale := 40; # TODO: Should this be consistent with TileViewer/CellViewer
 
 	for y in generator.num_rows:
 		draw_line(

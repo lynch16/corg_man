@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://bc4o2esipncgo"]
+
+[ext_resource type="Script" uid="uid://d0276dacawsg0" path="res://addons/mapgenerator/CellViewer/cell_viewer.gd" id="1_k2qge"]
+[ext_resource type="Script" uid="uid://c8pulk3p7rqfx" path="res://addons/mapgenerator/TileViewer/tile_viewer.gd" id="2_2j1qg"]
+
+[node name="ColorRect" type="ColorRect" unique_id=805001962]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 1144.0
+offset_bottom = 640.0
+color = Color(0.82606, 0.82606006, 0.82606, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=671808976]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=1340843973]
+layout_mode = 2
+
+[node name="CellViewer" type="Control" parent="MarginContainer/HBoxContainer" unique_id=2009422168]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("1_k2qge")
+
+[node name="TileViewer" type="Control" parent="MarginContainer/HBoxContainer" unique_id=413881967]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("2_2j1qg")
+
+[node name="Button" type="Button" parent="MarginContainer/HBoxContainer" unique_id=303470287]
+layout_mode = 2
+text = "Regen"
+
+[connection signal="on_generator_run_complete" from="MarginContainer/HBoxContainer/CellViewer" to="MarginContainer/HBoxContainer/TileViewer" method="_on_cell_generator_run"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/Button" to="MarginContainer/HBoxContainer/TileViewer" method="_gen"]

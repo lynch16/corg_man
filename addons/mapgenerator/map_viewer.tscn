@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dk1mtfaj1cbqs"]
 
-[ext_resource type="Script" uid="uid://d0276dacawsg0" path="res://addons/mapgenerator/main_panel/main_panel.gd" id="1_rgmfd"]
+[ext_resource type="Script" uid="uid://d0276dacawsg0" path="res://addons/mapgenerator/CellViewer/cell_viewer.gd" id="1_k2qge"]
+[ext_resource type="Script" uid="uid://da4dw1ymaoont" path="res://addons/mapgenerator/CellViewer/tile_viewer.gd" id="2_2j1qg"]
 
 [node name="ColorRect" type="ColorRect" unique_id=805001962]
 offset_left = 8.0
@@ -23,4 +24,11 @@ theme_override_constants/margin_bottom = 8
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer" unique_id=430279427]
 layout_mode = 2
-script = ExtResource("1_rgmfd")
+
+[node name="CellViewer" type="BoxContainer" parent="MarginContainer/CenterContainer" unique_id=491462175]
+layout_mode = 2
+script = ExtResource("1_k2qge")
+
+[node name="TileViewer" type="BoxContainer" parent="MarginContainer/CenterContainer" unique_id=141319911]
+layout_mode = 2
+script = ExtResource("2_2j1qg")

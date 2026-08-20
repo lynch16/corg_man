@@ -35,6 +35,8 @@ func run() -> void:
 		if (!_calculate_tunnels()):
 			continue;
 
+		# TODO: Join walls
+
 		if (!cell_tester.test_cell_gen(num_rows, num_columns, cells)):
 			continue;
 		
@@ -428,8 +430,21 @@ func _calculate_tunnels() -> bool:
 				if (num_tunnels_created == 0):
 					return false;
 
+	# Clean up unused dead ends
+	for i in range(void_tunnel_cells.size()):
+		var cell := void_tunnel_cells[i];
+		if (!cell.is_tunnel && cell.next[UP]):
+			_replace_group(cell.group_id, cell.next[UP].group_id);
+			cell.connect[UP] = true;
+			cell.next[UP].connect[DOWN] = true;
+
 	return true;
 
+func _replace_group(old_group: int, new_group: int) -> void:
+	for i in range(num_rows * num_columns):
+		var cell := cells[i];
+		if (cell.group_id == old_group):
+			cell.group_id = new_group;
 
 func _update_cell_dead_end(cell: BaseCell) -> void:
 	cell.connect[RIGHT] = true;
