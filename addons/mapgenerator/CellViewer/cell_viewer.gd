@@ -24,6 +24,8 @@ signal on_generator_run_complete(p_generator: CellGenerator)
 func _ready() -> void:
 	generator = CellGenerator.new();
 	generator.run();
+	prints("TUNNEL", generator.cells.find_custom(func (f): return f.is_tunnel))
+
 	on_generator_run_complete.emit(generator);
 
 func _process(delta: float) -> void:

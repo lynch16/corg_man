@@ -13,6 +13,7 @@ func _init(
 	p_filled: bool = false,
 	p_connect: Array[bool] = [false, false, false, false],
 	p_next: Array[BaseCell] = [null, null, null, null],
+	p_is_tunnel: bool = false,
 	p_w: int = -1,
 	p_h: int = -1,
 ) -> void:
@@ -23,6 +24,7 @@ func _init(
 	y = p_y;
 	connect = p_connect;
 	next = p_next;
+	is_tunnel = p_is_tunnel;
 	width = p_w;
 	height = p_h;
 
@@ -35,6 +37,7 @@ static func from(base_cell: BaseCell) -> TileCell:
 		base_cell.filled,
 		base_cell.connect,
 		base_cell.next,
+		base_cell.is_tunnel,
 		3, 
 		3 # TODO: Consider shrink width/height
 	)

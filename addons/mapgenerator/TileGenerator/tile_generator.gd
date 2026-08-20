@@ -60,14 +60,14 @@ func generate() -> void:
 
 	_set_path_tiles();
 	_extend_tunnels();
-	_fill_walls();
 	_set_ghost_door();
+	_fill_walls();
 	_set_energizers();
 	_clean_path_tunnels_and_ghost_house();
 
 func _set_path_tiles() -> void:
-	for y in num_subrows:
-		for x in num_subcolumns:
+	for y in range(num_subrows):
+		for x in range(num_subcolumns):
 			var cell := _get_tile_cell(x, y); 
 			var cell_left := _get_tile_cell(x - 1, y);
 			var cell_up := _get_tile_cell(x, y - 1);
@@ -95,13 +95,13 @@ func _set_path_tiles() -> void:
 			if (
 				_get_tile(x - 1, y) == TileType.Pellet &&
 				_get_tile(x, y - 1) == TileType.Pellet &&
-				_get_tile(x - 1, y - 1) == TileType.Unassigned
+				(_get_tile(x - 1, y - 1) == TileType.Null || _get_tile(x - 1, y - 1) == TileType.Unassigned)
 			):
 				_set_tile(x, y, TileType.Pellet);
 
 func _extend_tunnels() -> void:
 	var end_column_cell := cells[num_columns - 1];
-	while (end_column_cell && end_column_cell.id != -1):
+	while (_cell_valid(end_column_cell)):
 		if (end_column_cell.is_tunnel):
 			var y = end_column_cell.y + 1; # TODO: Why add one to y and rmove 1,2 below
 			_set_tile(num_subcolumns - 1, y, TileType.Pellet);
@@ -116,7 +116,7 @@ func _extend_tunnels() -> void:
 func _fill_walls() -> void:
 	for y in range(num_subrows):
 		for x in range(num_subcolumns):
-			# Blank tiles that share vertex with path tiles are walls
+			# Unassigned tiles that share vertex with path tiles are walls
 			# Check all tiles in circular pattern (fill in corners)
 			if (_get_tile(x, y) != TileType.Pellet && (
 					_get_tile(x - 1, y) == TileType.Pellet ||
@@ -148,8 +148,8 @@ func _set_tile(x: int, y: int, tile_type: TileType) -> void:
 	
 	# TODO: Why -2
 	var normalized_x := x - 2;
-	tiles[num_mid_columns + x + y * num_full_columns] = tile_type;
-	tiles[num_mid_columns - 1 - x + y * num_full_columns] = tile_type;
+	tiles[num_mid_columns + normalized_x + y * num_full_columns] = tile_type;
+	tiles[num_mid_columns - 1 - normalized_x + y * num_full_columns] = tile_type;
 
 func _get_tile(x: int, y: int) -> TileType:
 	# Make sure tile is selecting for only half since mirrored
@@ -158,12 +158,8 @@ func _get_tile(x: int, y: int) -> TileType:
 	
 	# TODO: Why -2
 	var normalized_x := x - 2;
-	var index := num_mid_columns + x + y * num_full_columns;
-	if (tiles.has(index)):
-		return tiles[num_mid_columns + x + y * num_full_columns];
-
-	# TODO: This is a workaround
-	return tiles[0];
+	var index := num_mid_columns + normalized_x + y * num_full_columns;
+	return tiles[index];
 
 func _set_tile_cell(x: int, y: int, cell: TileCell) -> void:
 	# Make sure tile cell is being set in half 
@@ -172,7 +168,7 @@ func _set_tile_cell(x: int, y: int, cell: TileCell) -> void:
 	
 	# TODO: Why -2
 	var normalized_x := x - 2;
-	tile_cells[x + y * num_subcolumns] = cell;
+	tile_cells[normalized_x + y * num_subcolumns] = cell;
 
 func _get_tile_cell(x: int, y: int) -> TileCell:
 	# Make sure tile is selecting for only half since mirrored
