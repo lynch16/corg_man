@@ -26,8 +26,6 @@ func upscale() -> Array[TileCell]:
 	_choose_tall_rows();
 	_choose_narrow_columns();
 
-	# if !(tall_rows.size() > 0):
-	# TODO::::: Narrow columns returns no results
 	if !(tall_rows.size() > 0 && narrow_columns.size() > 0):
 		return [];
 
@@ -110,6 +108,7 @@ func _set_resize_candidates() -> void:
 			cell.is_shrink_width_candidate = true;
 
 func _choose_tall_rows() -> void:
+	# From top left, find a row that can be raised before hitting the ghost house
 	for y in range(3):
 		var cell := cells[y * num_columns];
 		if (cell.is_raise_height_candidate && _can_raise_height(0, y)):
@@ -127,7 +126,7 @@ func _can_raise_height(x: int, y: int) -> bool:
 	var selected_cell: BaseCell;
 	var right_cell: BaseCell;
 
-	for row_index in range(y, 0, -1):
+	for row_index in range(y, -1, -1):
 		selected_cell = cells[x + row_index * num_columns];
 		right_cell = selected_cell.next[CellGenerator.RIGHT];
 		if (
@@ -164,18 +163,16 @@ func _can_raise_height(x: int, y: int) -> bool:
 
 func _choose_narrow_columns() -> void:
 	# Count columns from outside in
-	for x in range(num_columns - 1, 0, -1):
+	for x in range(num_columns - 1, -1, -1):
 		var cell := cells[x];
 		if (cell.is_shrink_width_candidate && _can_shrink_width(x, 0)):
 			cell.shrink_width = true;
 			narrow_columns[cell.y] = cell.x;
-			print("CHOSE NARROW: ", cell.y);
 			break;
 
 func _can_shrink_width(x: int, y: int) -> bool:
 	## At end of map so safe to expand
 	if (y == num_rows - 1):
-		print("END MAP?")
 		return true;
 
 	# Walk on the right hand side of cells
@@ -209,12 +206,9 @@ func _can_shrink_width(x: int, y: int) -> bool:
 	
 	for selection in left_candidates:
 		if (_can_shrink_width(selection.x, selection.y)):
-			print("SHRINK DAT");
 			selection.shrink_width = true;
 			narrow_columns[selection.y] = selection.x;
 			return true;
-		else:
-			print("CANT SHRINK: ", selection.x, ", ", selection.y)
 	
 	return false;
 

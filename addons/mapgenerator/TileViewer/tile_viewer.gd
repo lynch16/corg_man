@@ -7,8 +7,8 @@ extends Control
 @export var tile_unassigned_color := Color(0, 124, 0, 0.1); # Light green
 @export var tile_wall_color := Color(0, 255, 255, 0.1); # Light blue
 @export var tile_pellet_color := Color(255, 0, 0, 0.4); # Red
-@export var tile_energizer_color := Color(0, 255, 0, 0.4);
-@export var tile_door_color := Color(255, 0, 255, 0.1); # Pink
+@export var tile_energizer_color := Color(255, 255, 0, 0.4); # Yellow
+@export var tile_door_color := Color(255, 0, 255, 0.4); # Pink
 @export var tile_blank_color := Color(0, 0, 0, 0.4);
 
 signal failed_resize();
@@ -29,7 +29,7 @@ var cell_generator: CellGenerator;
 var has_loaded := false;
 
 var num_reruns := 0;
-var max_reruns := 1000;
+var max_reruns := 100;
 
 func _ready() -> void:
 	pass;
@@ -37,6 +37,7 @@ func _ready() -> void:
 func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
 	cell_generator = p_cell_gen;
 
+	# TODO: Resizing to final map doesn't work
 	# _resize_and_gen();
 	_resize_static();
 
