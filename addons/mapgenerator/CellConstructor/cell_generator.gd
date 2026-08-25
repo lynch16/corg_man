@@ -18,7 +18,7 @@ var prob_extend_leg_size_2 := 1.0;
 var prob_extend_leg_size_3_4 := 0.5;
 var prob_insert_two_tunnels := 0.45;
 
-var cells: Array[BaseCell];
+var cells: Array[Array];
 var max_cell_size := 5;
 var max_long_pieces := 1;
 
@@ -44,49 +44,90 @@ func run() -> void:
 
 	print("GENERATED AFTER: ", generate_count)
 
+func _get_cell_left(p_x: int, p_y: int):
+	var x := p_x - 1;
+	var y := p_y;
+	if (x < 0 || x >= num_columns):
+		return;
+	elif (y < 0 || y >= num_rows):
+		return;
+
+	return cells[x][y];
+func _get_cell_right(p_x: int, p_y: int):
+	var x := p_x + 1;
+	var y := p_y;
+	if (x < 0 || x >= num_columns):
+		return;
+	elif (y < 0 || y >= num_rows):
+		return;
+		
+	return cells[x][y];
+func _get_cell_down(p_x: int, p_y: int):
+	var x := p_x;
+	var y := p_y + 1;
+	if (x < 0 || x >= num_columns):
+		return;
+	elif (y < 0 || y >= num_rows):
+		return;
+		
+	return cells[x][y];
+func _get_cell_up(p_x: int, p_y: int):
+	var x := p_x;
+	var y := p_y - 1;
+	if (x < 0 || x >= num_columns):
+		return;
+	elif (y < 0 || y >= num_rows):
+		return;
+		
+	return cells[x][y];
+func _get_cell(x: int, y: int) -> BaseCell:
+	return cells[x][y];
+
 func reset_map() -> void:
-	cells.resize(num_rows * num_columns)
-	for i in range(num_rows * num_columns):
-		cells[i] = BaseCell.new(
-			i % num_columns,
-			floor(i / num_columns)
-		)
+	cells.resize(num_columns)
+	for x in range(num_columns):
+		cells[x].resize(num_rows);
+
+		for y in range(num_rows):
+			cells[x][y] = BaseCell.new(
+				x,
+				y
+			)
 	
 	# allow each cell to refer to surround cells by direction
-	for i in range(num_rows * num_columns):
-		var c := cells[i];
-		if (c.x > 0):
-			c.next[LEFT] = cells[i - 1];
-		if (c.x < num_columns - 1):
-			c.next[RIGHT] = cells[i + 1];
-		if (c.y > 0):
-			c.next[UP] = cells[i - num_columns];
-		if (c.y < num_rows - 1):
-			c.next[DOWN] = cells[i + num_columns];
+	for x in range(num_columns):
+		for y in range(num_rows):
+			var c = _get_cell(x, y);
+			if (c.x > 0):
+				c.next[LEFT] = _get_cell_left(x, y);
+			if (c.x < num_columns - 1):
+				c.next[RIGHT] = _get_cell_right(x, y);
+			if (c.y > 0):
+				c.next[UP] = _get_cell_up(x, y);
+			if (c.y < num_rows - 1):
+				c.next[DOWN] = _get_cell_down(x, y);
 
 	# define the ghost home square
-	var i := 3 * num_columns;
-	var c := cells[i];
+	var home_start_x := 0;
+	var home_start_y := 3;
+	var c = _get_cell(home_start_x, home_start_y);
 	c.filled=true;
 	c.connect[LEFT] = true
 	c.connect[RIGHT] = true
 	c.connect[DOWN] = true;
 
-	i += 1
-	c = cells[i];
+	c = _get_cell(home_start_x  + 1, home_start_y);
 	c.filled=true;
 	c.connect[LEFT] = true
 	c.connect[DOWN] = true;
 
-	i += num_columns-1;
-	c = cells[i];
+	c = _get_cell(home_start_x, home_start_y + 1);
 	c.filled=true;
 	c.connect[LEFT] = true;
 	c.connect[UP] = true;
 	c.connect[RIGHT] = true;
 
-	i += 1
-	c = cells[i];
+	c = _get_cell(home_start_x + 1, home_start_y + 1);
 	c.filled=true;
 	c.connect[UP] = true;
 	c.connect[LEFT] = true;
@@ -103,7 +144,8 @@ func generate_map() -> void:
 	# A single cell group of size 1 is allowed at each row at y=0 and y=rows-1,
 	# so keep count of those created.
 	var single_count = {};
-	single_count[0] = single_count[num_rows - 1] if single_count.has(num_rows - 1) else 0;
+	single_count[0] = 0;
+	single_count[num_rows - 1] = 0;
 
 	while (true):
 		var open_cells := _get_left_most_empty_cells();
@@ -257,7 +299,7 @@ func _get_left_most_empty_cells() -> Array[BaseCell]:
 
 	for x in range(num_columns):
 		for y in range(num_rows):
-			var cell = cells[x + y * num_columns];
+			var cell := _get_cell(x, y);
 			if (!cell.filled):
 				left_empty_cells.append(cell);
 
@@ -335,7 +377,7 @@ func _calculate_tunnels() -> bool:
 
 	# Prepare data
 	for y in range(num_rows):
-		var cell := cells[num_columns - 1 + y * num_columns];
+		var cell := _get_cell(num_columns - 1, y);
 
 		# Dont create tunnels if connected vertically
 		if (cell.connect[UP]):
@@ -440,10 +482,11 @@ func _calculate_tunnels() -> bool:
 	return true;
 
 func _replace_group(old_group: int, new_group: int) -> void:
-	for i in range(num_rows * num_columns):
-		var cell := cells[i];
-		if (cell.group_id == old_group):
-			cell.group_id = new_group;
+	for x in range(num_columns):
+		for y in range(num_rows):
+			var cell := _get_cell(x, y);
+			if (cell.group_id == old_group):
+				cell.group_id = new_group;
 
 func _update_cell_dead_end(cell: BaseCell) -> void:
 	cell.connect[RIGHT] = true;
