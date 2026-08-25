@@ -11,6 +11,8 @@ extends Control
 @export var tile_door_color := Color(255, 0, 255, 0.1); # Pink
 @export var tile_blank_color := Color(0, 0, 0, 0.4);
 
+signal failed_resize();
+
 var tile_color_map: Dictionary[TileGenerator.TileType, Color] = {
 	TileGenerator.TileType.Null: tile_null_color,
 	TileGenerator.TileType.Unassigned: tile_unassigned_color,
@@ -26,17 +28,34 @@ var cell_generator: CellGenerator;
 
 var has_loaded := false;
 
+var num_reruns := 0;
+var max_reruns := 1000;
+
 func _ready() -> void:
 	pass;
 
 func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
-
 	cell_generator = p_cell_gen;
-	tile_generator = TileGenerator.new(
+	var resizer := CellTileResizer.new(
 		cell_generator.cells,
 		cell_generator.num_rows,
 		cell_generator.num_columns
+	)
+	var resized_cells := resizer.upscale();
+	if (!resized_cells.size()):
+		if (num_reruns < max_reruns):
+			num_reruns += 1;
+			failed_resize.emit();
+		else:
+			print_debug("Reached max resize failures")
+		return;
+
+	tile_generator = TileGenerator.new(
+		resized_cells,
+		resizer.num_rows,
+		resizer.num_columns
 	);
+	print("GEN TILES");
 	_gen();
 
 func _gen() -> void:

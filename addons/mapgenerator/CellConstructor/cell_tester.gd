@@ -66,13 +66,6 @@ func test_cell_gen(p_rows: int, p_columns: int, p_cells: Array[BaseCell]) -> boo
 				cells[x + 1 + (y + 1) * num_columns].connect[CellGenerator.LEFT] = true;
 				cells[x + 1 + (y + 1) * num_columns].group_id = group;
 
-	# TODO
-	# Make sure the map contains cells that can grow/shrink to final size
-	# if (!_has_height_grow_cell()):
-	# 	return false;
-	# if (!_has_width_shrink_cell()):
-	# 	return false;
-	# TODO: don't allow a horizontal path to cut straight through a map (through tunnels)
 	if (!_check_no_full_width_path()):
 		return false;
 

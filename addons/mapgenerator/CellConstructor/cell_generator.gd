@@ -137,8 +137,7 @@ func generate_map() -> void:
 		if (random_cell.x == num_columns - 1):
 			# if the first cell is at the right edge, then don't grow it.
 			random_cell.connect[RIGHT] = true;
-			# TODO
-			# random_cell.is_raise_height_candidate = true;
+			random_cell.is_raise_height_candidate = true;
 		else:
 			while (size < max_cell_size):
 				var stop := false;

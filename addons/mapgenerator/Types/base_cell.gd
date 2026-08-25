@@ -10,6 +10,10 @@ var next: Array[BaseCell];
 
 var is_tunnel: bool;
 var dead_end_direction: int;
+var raise_height: bool;
+var is_raise_height_candidate = false;
+var shrink_width: bool;
+var is_shrink_width_candidate = false;
 
 var debug := {
 	is_edge_tunnel_candidate = false,

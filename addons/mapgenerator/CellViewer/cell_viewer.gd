@@ -22,9 +22,11 @@ var generator: CellGenerator;
 signal on_generator_run_complete(p_generator: CellGenerator)
 
 func _ready() -> void:
+	run();
+
+func run() -> void:
 	generator = CellGenerator.new();
 	generator.run();
-	prints("TUNNEL", generator.cells.find_custom(func (f): return f.is_tunnel))
 
 	on_generator_run_complete.emit(generator);
 

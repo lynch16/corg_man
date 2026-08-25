@@ -40,4 +40,5 @@ layout_mode = 2
 text = "Regen"
 
 [connection signal="on_generator_run_complete" from="MarginContainer/HBoxContainer/CellViewer" to="MarginContainer/HBoxContainer/TileViewer" method="_on_cell_generator_run"]
+[connection signal="failed_resize" from="MarginContainer/HBoxContainer/TileViewer" to="MarginContainer/HBoxContainer/CellViewer" method="run"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/Button" to="MarginContainer/HBoxContainer/TileViewer" method="_gen"]

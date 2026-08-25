@@ -27,12 +27,11 @@ var num_mid_columns: int;
 var num_full_columns: int;
 
 func _init(
-	base_cells: Array[BaseCell] = [],
+	p_cells: Array[TileCell] = [],
 	p_num_rows: int = 0,
 	p_num_columns: int = 0
 ) -> void:
-	for base_cell in base_cells:
-		cells.append(TileCell.from(base_cell));
+	cells = p_cells;
 	num_rows = p_num_rows;
 	num_columns = p_num_columns;
 
