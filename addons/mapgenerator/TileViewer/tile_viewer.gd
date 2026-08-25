@@ -3,13 +3,13 @@ extends Control
 
 @export var grid_color := Color(0, 0, 0, 0.3);
 
-@export var tile_null_color := Color(124, 0, 0, 0.1); # Light Red
-@export var tile_unassigned_color := Color(0, 124, 0, 0.1); # Light green
-@export var tile_wall_color := Color(0, 255, 255, 0.1); # Light blue
-@export var tile_pellet_color := Color(255, 0, 0, 0.4); # Red
+@export var tile_null_color := Color(255, 0, 0, 1.0); # Light Red
+@export var tile_unassigned_color := Color(0, 0, 0, 0); # White
+@export var tile_wall_color := Color(0, 0, 255, 0.4); # Blue
+@export var tile_pellet_color := Color(0, 0, 0, 0.2); # Grey
 @export var tile_energizer_color := Color(255, 255, 0, 0.4); # Yellow
 @export var tile_door_color := Color(255, 0, 255, 0.4); # Pink
-@export var tile_blank_color := Color(0, 0, 0, 0.4);
+@export var tile_blank_color := Color(0, 0, 0, 0.1); # Light Grey
 
 signal failed_resize();
 

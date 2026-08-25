@@ -137,7 +137,97 @@ func _set_energizers() -> void:
 	pass;
 
 func _clean_path_tunnels_and_ghost_house() -> void:
-	pass;
+	# Erase in tunnels
+	var edge_x := num_subcolumns - 1;
+	for y in range(num_subrows):
+		if (_get_tile(edge_x, y) == TileType.Pellet):
+			_erase_until_intersection(edge_x, y);
+
+	# Erase at starting position
+	# TODO: This should be parameterized
+	_set_tile(1, num_subrows - 8, TileType.Blank);
+
+	# Erase around ghost house
+	for column_index in range(7):
+		# TODO: This should be parameterized
+		var bottom_house_row := num_subrows - 14;
+		_set_tile(column_index, bottom_house_row, TileType.Blank);
+
+		var bottom_row_offset := 1;
+		# erase pellets from bottom of the ghost house proceeding down until
+		# reaching a pellet tile that isn't surround by walls
+		# on the left and right
+		while (
+			_get_tile(column_index, bottom_house_row + bottom_row_offset) == TileType.Pellet && \
+			_get_tile(column_index - 1, bottom_house_row + bottom_row_offset) == TileType.Wall && \
+			_get_tile(column_index + 1, bottom_house_row + bottom_row_offset) == TileType.Wall
+		):
+			_set_tile(column_index, bottom_house_row + bottom_row_offset, TileType.Blank);
+			bottom_row_offset += 1;
+
+		# TODO: This should be parameterized
+		var top_house_row := num_subcolumns - 20;
+		_set_tile(column_index, top_house_row, TileType.Blank);
+
+		var top_row_offset := 1;
+		# erase pellets from top of the ghost house proceeding up until
+		# reaching a pellet tile that isn't surround by walls
+		# on the left and right
+		while (
+			_get_tile(column_index, bottom_house_row - top_row_offset) == TileType.Pellet && \
+			_get_tile(column_index - 1, bottom_house_row - top_row_offset) == TileType.Wall && \
+			_get_tile(column_index + 1, bottom_house_row - top_row_offset) == TileType.Wall
+		):
+			_set_tile(column_index, bottom_house_row - top_row_offset, TileType.Blank);
+			top_row_offset += 1;
+
+		# Erase pellets on the side of the ghost house
+		# TODO: This should be parameterized
+		var side_x := 6;
+		var side_row := num_subrows - 14 - column_index;
+		_set_tile(side_x, side_row, TileType.Blank);
+
+		var side_row_offset := 1;
+		# erase pellets from side of the ghost house proceeding right until
+		# reaching a pellet tile that isn't surround by walls
+		# on the top and bottom.
+		while (
+			_get_tile(side_x, side_row + side_row_offset) == TileType.Pellet && \
+			_get_tile(side_x - 1, side_row + side_row_offset) == TileType.Wall && \
+			_get_tile(side_x + 1, side_row + side_row_offset) == TileType.Wall
+		):
+			_set_tile(side_x, side_row + side_row_offset, TileType.Blank);
+			side_row_offset += 1;
+
+func _erase_until_intersection(x: int, y: int) -> void:
+	var cells_to_edit: Array = [];
+	if (_get_tile(x - 1, y) == TileType.Pellet):
+		cells_to_edit.append({
+			"x": x - 1,
+			"y": y
+		});
+	if (_get_tile(x + 1, y) == TileType.Pellet):
+		cells_to_edit.append({
+			"x": x + 1,
+			"y": y
+		});
+	if (_get_tile(x, y - 1) == TileType.Pellet):
+		cells_to_edit.append({
+			"x": x,
+			"y": y - 1
+		});
+	if (_get_tile(x, y + 1) == TileType.Pellet):
+		cells_to_edit.append({
+			"x": x,
+			"y": y + 1
+		});
+
+	if (cells_to_edit.size() == 1):
+		_set_tile(x, y, TileType.Blank);
+		print(str(cells_to_edit[0]))
+		x = cells_to_edit[0].x;
+		y = cells_to_edit[0].y;
+		return _erase_until_intersection(x, y);
 
 # Sets tile by applying tile type symetrically around the middle column
 func _set_tile(x: int, y: int, tile_type: TileType) -> void:

@@ -34,8 +34,13 @@ script = ExtResource("1_k2qge")
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_2j1qg")
+tile_null_color = Color(124, 0, 0, 0.1)
+tile_unassigned_color = Color(0, 124, 0, 0.1)
+tile_wall_color = Color(0, 255, 255, 0.1)
+tile_pellet_color = Color(255, 0, 0, 0.4)
 tile_energizer_color = Color(0, 255, 0, 0.4)
 tile_door_color = Color(255, 0, 255, 0.1)
+tile_blank_color = Color(0, 0, 0, 0.4)
 
 [node name="Button" type="Button" parent="MarginContainer/HBoxContainer" unique_id=303470287]
 layout_mode = 2
