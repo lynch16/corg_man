@@ -44,5 +44,5 @@ static func from(base_cell: BaseCell) -> TileCell:
 		base_cell.raise_height,
 		base_cell.shrink_width,
 		3, 
-		3 # TODO: Consider shrink width/height
+		3 
 	)

@@ -36,6 +36,11 @@ func _ready() -> void:
 
 func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
 	cell_generator = p_cell_gen;
+
+	# _resize_and_gen();
+	_resize_static();
+
+func _resize_and_gen() -> void:
 	var resizer := CellTileResizer.new(
 		cell_generator.cells,
 		cell_generator.num_rows,
@@ -55,7 +60,21 @@ func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
 		resizer.num_rows,
 		resizer.num_columns
 	);
-	print("GEN TILES");
+	_gen();
+
+func _resize_static() -> void:
+	var tile_cells: Array[TileCell] = [];
+	for cell in cell_generator.cells:
+		var tc := TileCell.from(cell);
+		tc.x = tc.x * CellTileResizer.TILE_SCALE;
+		tc.y = tc.y * CellTileResizer.TILE_SCALE;
+		tile_cells.append(tc);
+		
+	tile_generator = TileGenerator.new(
+		tile_cells,
+		cell_generator.num_rows,
+		cell_generator.num_columns
+	);
 	_gen();
 
 func _gen() -> void:
