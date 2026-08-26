@@ -41,35 +41,40 @@ func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
 	# _resize_and_gen();
 	_resize_static();
 
-func _resize_and_gen() -> void:
-	var resizer := CellTileResizer.new(
-		cell_generator.cells,
-		cell_generator.num_rows,
-		cell_generator.num_columns
-	)
-	var resized_cells := resizer.upscale();
-	if (!resized_cells.size()):
-		if (num_reruns < max_reruns):
-			num_reruns += 1;
-			failed_resize.emit();
-		else:
-			print_debug("Reached max resize failures")
-		return;
+# func _resize_and_gen() -> void:
+# 	var resizer := CellTileResizer.new(
+# 		cell_generator.cells,
+# 		cell_generator.num_rows,
+# 		cell_generator.num_columns
+# 	)
+# 	var resized_cells := resizer.upscale();
+# 	if (!resized_cells.size()):
+# 		if (num_reruns < max_reruns):
+# 			num_reruns += 1;
+# 			failed_resize.emit();
+# 		else:
+# 			print_debug("Reached max resize failures")
+# 		return;
 
-	tile_generator = TileGenerator.new(
-		resized_cells,
-		resizer.num_rows,
-		resizer.num_columns
-	);
-	_gen();
+# 	tile_generator = TileGenerator.new(
+# 		resized_cells,
+# 		resizer.num_rows,
+# 		resizer.num_columns
+# 	);
+# 	_gen();
 
 func _resize_static() -> void:
-	var tile_cells: Array[TileCell] = [];
-	for cell in cell_generator.cells:
-		var tc := TileCell.from(cell);
-		tc.x = tc.x * CellTileResizer.TILE_SCALE;
-		tc.y = tc.y * CellTileResizer.TILE_SCALE;
-		tile_cells.append(tc);
+	var tile_cells: Array[Array] = [];
+	tile_cells.resize(cell_generator.num_columns);
+	for x in range(cell_generator.num_columns):
+		tile_cells[x] = [];
+		tile_cells[x].resize(cell_generator.num_rows);
+		for y in range(cell_generator.num_rows):
+			var cell = cell_generator._get_cell(x, y);
+			var tc := TileCell.from(cell);
+			tc.x = tc.x * CellTileResizer.TILE_SCALE;
+			tc.y = tc.y * CellTileResizer.TILE_SCALE;
+			tile_cells[x][y] = tc;
 		
 	tile_generator = TileGenerator.new(
 		tile_cells,
@@ -93,14 +98,12 @@ func _draw() -> void:
 func _draw_tiles() -> void:
 	var draw_scale := 40; # TODO: Should this be consistent with TileViewer/CellViewer
 
-	# TODO: Would this be easier if I convert this to a 2D array?
-
 	var subsize := draw_scale / 3;
-	var num_subrows := tile_generator.num_rows * 3 + 1 + 3; # TODO: Why these nums
-	var num_subcolumns := tile_generator.num_columns * 3 - 1 + 2;
-	var num_full_columns := (num_subcolumns - 2) * 2;
+	var num_tile_rows := tile_generator.num_tile_rows;
+	var num_tile_columns := tile_generator.num_tile_columns;
+	var num_full_columns := (num_tile_columns - 2) * 2;
 
-	for i in range(num_subrows):
+	for i in range(num_tile_rows):
 		var y := i * subsize;
 		draw_line(
 			Vector2(0, y),
@@ -112,16 +115,15 @@ func _draw_tiles() -> void:
 		var x := i * subsize;
 		draw_line(
 			Vector2(x, 0),
-			Vector2(x, num_subrows * subsize),
+			Vector2(x, num_tile_rows * subsize),
 			grid_color
 		);
 
-	for i in range(num_subrows * num_full_columns):
-		var x := i % num_full_columns;
-		var y = floori(i / num_full_columns);
-		var color := tile_color_map[tile_generator.tiles[i]]
+	for x in range(num_full_columns):
+		for y in range(num_tile_rows):
+			var color := tile_color_map[tile_generator.tiles[x][y]]
 
-		draw_rect(
-			Rect2(x * subsize, y * subsize, subsize, subsize),
-			color,
-		);
+			draw_rect(
+				Rect2(x * subsize, y * subsize, subsize, subsize),
+				color,
+			);
