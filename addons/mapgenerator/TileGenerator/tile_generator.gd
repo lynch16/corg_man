@@ -1,5 +1,9 @@
 class_name TileGenerator extends RefCounted
 
+const TOP_WALL_ROW_OFFSET = 1;
+const GHOST_HOUSE_COLUMN_OFFSET = 2;
+const COLUMN_SHRINK_OFFSET = 1;
+
 enum TileType {
 	Null = -1,
 	Unassigned = 0,
@@ -35,9 +39,9 @@ func _init(
 	num_cell_rows = p_num_rows;
 	num_cell_columns = p_num_columns;
 
-	num_tile_rows = num_cell_rows * 3 + 1 + 3; # Given num_cell_rows == 9, this will be 31
-	num_tile_columns = num_cell_columns * 3 - 1 + 2; # Given num_cell_columns == 5, this will be 16 (half + ghost house)
-	num_mid_columns = num_tile_columns - 2; # Subtract the ghost house
+	num_tile_rows = num_cell_rows * 3 + TOP_WALL_ROW_OFFSET + 3; # Given num_cell_rows == 9, this will be 31
+	num_tile_columns = num_cell_columns * 3 - COLUMN_SHRINK_OFFSET + GHOST_HOUSE_COLUMN_OFFSET; # Given num_cell_columns == 5, this will be 16 (half + ghost house)
+	num_mid_columns = num_tile_columns - GHOST_HOUSE_COLUMN_OFFSET; # Subtract the ghost house
 	num_full_columns = num_mid_columns * 2; # Double for final width
 
 func generate() -> void:
@@ -62,9 +66,8 @@ func generate() -> void:
 			var cell := _get_cell(x, y);
 			for tile_x in range(cell.width):
 				for tile_y in range(cell.height):
-					# TODO: Why add 1 to Y
-					prints(cell.x + tile_x, cell.y + 1 + tile_y, tile_cells[x].size(), tile_cells.size())
-					_set_tile_cell(cell.x + tile_x, cell.y + 1 + tile_y, cell);
+					# Adding 1 to offset top row with row of walls
+					_set_tile_cell(cell.x + tile_x, cell.y + TOP_WALL_ROW_OFFSET + tile_y, cell);
 
 	_set_path_tiles();
 	_extend_tunnels();
@@ -111,8 +114,8 @@ func _extend_tunnels() -> void:
 	var end_column_cell := _get_cell(num_cell_columns - 1, 0);
 	while (_cell_valid(end_column_cell)):
 		if (end_column_cell.is_tunnel):
-			var y = end_column_cell.y + 1; # TODO: Why add one to y and rmove 1,2 below
-			_set_tile(num_tile_columns - 1, y, TileType.Pellet);
+			var y = end_column_cell.y + TOP_WALL_ROW_OFFSET;
+			_set_tile(num_tile_columns - 1, y, TileType.Pellet); # Tunnels are 2 columns wide
 			_set_tile(num_tile_columns - 2, y, TileType.Pellet);
 
 		var next_cell_down := end_column_cell.next[CellGenerator.DOWN];
@@ -247,8 +250,7 @@ func _set_tile(x: int, y: int, tile_type: TileType) -> void:
 	if (x < 0 || x > num_tile_columns - 1 || y < 0 || y > num_tile_rows - 1):
 		return;
 	
-	# TODO: Why -2
-	var normalized_x := x - 2;
+	var normalized_x := x - GHOST_HOUSE_COLUMN_OFFSET;
 	tiles[num_mid_columns + normalized_x][y] = tile_type;
 	tiles[num_mid_columns - 1 - normalized_x][y] = tile_type;
 
@@ -257,8 +259,7 @@ func _get_tile(x: int, y: int) -> TileType:
 	if (x < 0 || x > num_tile_columns - 1 || y < 0 || y > num_tile_rows - 1):
 		return TileType.Null;
 	
-	# TODO: Why -2
-	var normalized_x := x - 2;
+	var normalized_x := x - GHOST_HOUSE_COLUMN_OFFSET;
 	return tiles[num_mid_columns + normalized_x][y];
 
 # TODO: Set and GET are different b/c they are being used differently
@@ -267,8 +268,7 @@ func _set_tile_cell(x: int, y: int, cell: TileCell) -> void:
 	if (x < 0 || x > num_tile_columns - 1 || y < 0 || y > num_tile_rows - 1):
 		return;
 	
-	# TODO: Why -2 == This is because we are counting from the center -> right
-	var normalized_x := x - 2;
+	var normalized_x := x - GHOST_HOUSE_COLUMN_OFFSET;
 	tile_cells[normalized_x][y] = cell;
 
 func _get_tile_cell(x: int, y: int) -> TileCell:

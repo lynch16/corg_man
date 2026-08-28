@@ -38,30 +38,30 @@ func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
 	cell_generator = p_cell_gen;
 
 	# TODO: Resizing to final map doesn't work
-	# _resize_and_gen();
-	_resize_static();
+	_resize_and_gen();
+	# _resize_static();
 
-# func _resize_and_gen() -> void:
-# 	var resizer := CellTileResizer.new(
-# 		cell_generator.cells,
-# 		cell_generator.num_rows,
-# 		cell_generator.num_columns
-# 	)
-# 	var resized_cells := resizer.upscale();
-# 	if (!resized_cells.size()):
-# 		if (num_reruns < max_reruns):
-# 			num_reruns += 1;
-# 			failed_resize.emit();
-# 		else:
-# 			print_debug("Reached max resize failures")
-# 		return;
+func _resize_and_gen() -> void:
+	var resizer := CellTileResizer.new(
+		cell_generator.cells,
+		cell_generator.num_rows,
+		cell_generator.num_columns
+	)
+	var resized_cells := resizer.upscale();
+	if (!resized_cells.size()):
+		if (num_reruns < max_reruns):
+			num_reruns += 1;
+			failed_resize.emit();
+		else:
+			print_debug("Reached max resize failures")
+		return;
 
-# 	tile_generator = TileGenerator.new(
-# 		resized_cells,
-# 		resizer.num_rows,
-# 		resizer.num_columns
-# 	);
-# 	_gen();
+	tile_generator = TileGenerator.new(
+		resized_cells,
+		resizer.num_rows,
+		resizer.num_columns
+	);
+	_gen();
 
 func _resize_static() -> void:
 	var tile_cells: Array[Array] = [];
