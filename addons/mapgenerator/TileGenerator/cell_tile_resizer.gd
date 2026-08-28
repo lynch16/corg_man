@@ -3,7 +3,7 @@ class_name CellTileResizer extends RefCounted
 
 const TILE_SCALE = 3;
 
-var cells: Array[BaseCell];
+var cells: Array[Array];
 var num_rows: int;
 var num_columns: int;
 
@@ -13,7 +13,7 @@ var tall_rows: Dictionary[int, int];
 var narrow_columns: Dictionary[int, int];
 
 func _init(
-	p_cells: Array[BaseCell],
+	p_cells: Array[Array],
 	p_num_rows: int,
 	p_num_columns: int,
 ) -> void:
@@ -21,97 +21,93 @@ func _init(
 	num_columns = p_num_columns;
 	num_rows = p_num_rows;
 
-func upscale() -> Array[TileCell]:
+func upscale() -> Array[Array]:
 	_set_resize_candidates();
 	_choose_tall_rows();
 	_choose_narrow_columns();
 
-	# if !(tall_rows.size() > 0):
-	# TODO::::: Narrow columns returns no results
-	if !(tall_rows.size() > 0 && narrow_columns.size() > 0):
+	if !(tall_rows.size() > 0 && narrow_columns.size()):
 		return [];
 
-	var tile_cells: Array[TileCell] = [];
+	var tile_cells: Array[Array] = [];
+	tile_cells.resize(cells.size());
 
-	for i in range(num_rows * num_columns):
-		var tile_cell := TileCell.from(cells[i]);
-		var final_x := tile_cell.x * TILE_SCALE;;
-		if (narrow_columns.has(tile_cell.y) && narrow_columns[tile_cell.y] < tile_cell.x):
-			final_x -= 1;
-		tile_cell.x = final_x;
+	for x in num_columns:
+		tile_cells[x].resize(num_rows);
 
-		var final_y = tile_cell.y * TILE_SCALE;
-		if (tall_rows.has(tile_cell.x) && tall_rows[tile_cell.x] < tile_cell.y):
-			final_y += 1;
-		tile_cell.y = final_y;
+		for y in num_rows:
+			var tile_cell := TileCell.from(_get_cell(x, y));
+			var final_x := tile_cell.x * TILE_SCALE;;
+			if (narrow_columns.has(tile_cell.y) && narrow_columns[tile_cell.y] < tile_cell.x):
+				final_x -= 1;
+			tile_cell.x = final_x;
 
-		if (tile_cell.raise_height):
-			print("RAISE");
-		if (tile_cell.shrink_width):
-			print("SHRINK");	
+			var final_y = tile_cell.y * TILE_SCALE;
+			if (tall_rows.has(tile_cell.x) && tall_rows[tile_cell.x] < tile_cell.y):
+				final_y += 1;
+			tile_cell.y = final_y;
 
-		tile_cell.width = 2 if tile_cell.shrink_width else 3;
-		tile_cell.height = 4 if tile_cell.raise_height else 3;
+			tile_cell.width = 2 if tile_cell.shrink_width else 3;
+			tile_cell.height = 4 if tile_cell.raise_height else 3;
 
-		tile_cells.append(tile_cell);
+			tile_cells[x][y] = tile_cell;
 
 	return tile_cells;
 
 func _set_resize_candidates() -> void:
-	for i in range(num_columns * num_rows):
-		var cell := cells[i];
-		var x := i % num_columns;
-		var y := floori(i / num_columns);
+	for x in num_columns:
+		for y in num_rows:
+			var cell := _get_cell(x, y);
 
-		
-		#  determine if it has flexible height
+			#  determine if it has flexible height
 
-		# 
-		#  |_|
-		# 
-		#  or
-		#   _
-		#  | |
-		if (
-			(cell.x == 0 || !cell.connect[CellGenerator.LEFT]) &&
-			(cell.x == num_columns - 1 || !cell.connect[CellGenerator.RIGHT]) &&
-			cell.connect[CellGenerator.UP] != cell.connect[CellGenerator.DOWN]
-		):
-			cell.is_raise_height_candidate = true;
+			# 
+			#  |_|
+			# 
+			#  or
+			#   _
+			#  | |
+			if (
+				(cell.x == 0 || !cell.connect[CellGenerator.LEFT]) &&
+				(cell.x == num_columns - 1 || !cell.connect[CellGenerator.RIGHT]) &&
+				cell.connect[CellGenerator.UP] != cell.connect[CellGenerator.DOWN]
+			):
+				cell.is_raise_height_candidate = true;
 
-		#   _ _
-		#  |_ _|
-		# 
-		var right_cell := cell.next[CellGenerator.RIGHT];
-		if (right_cell &&
-			((cell.x == 0 || !cell.connect[CellGenerator.LEFT]) && !cell.connect[CellGenerator.UP] && !cell.connect[CellGenerator.DOWN]) &&
-			((right_cell.x == num_columns - 1 || !right_cell.connect[CellGenerator.RIGHT]) && !right_cell.connect[CellGenerator.UP] && !right_cell.connect[CellGenerator.DOWN])
-		):
-			cell.is_raise_height_candidate = right_cell.is_raise_height_candidate;
+			#   _ _
+			#  |_ _|
+			# 
+			var right_cell := cell.next[CellGenerator.RIGHT];
+			if (right_cell &&
+				((cell.x == 0 || !cell.connect[CellGenerator.LEFT]) && !cell.connect[CellGenerator.UP] && !cell.connect[CellGenerator.DOWN]) &&
+				((right_cell.x == num_columns - 1 || !right_cell.connect[CellGenerator.RIGHT]) && !right_cell.connect[CellGenerator.UP] && !right_cell.connect[CellGenerator.DOWN])
+			):
+				cell.is_raise_height_candidate = right_cell.is_raise_height_candidate;
 
-		# Determine if width if flexible
+			# Determine if width if flexible
 
-		# if cell is on the right edge with an opening to the right
-		if (cell.x == num_columns - 1 && cell.connect[CellGenerator.RIGHT]):
-			cell.is_shrink_width_candidate = true;
+			# if cell is on the right edge with an opening to the right
+			if (cell.x == num_columns - 1 && cell.connect[CellGenerator.RIGHT]):
+				cell.is_shrink_width_candidate = true;
 
-		#   _
-		#  |_
-		#  
-		#  or
-		#   _
-		#   _|
-		# 
-		if (
-			(cell.y == 0 || !cell.connect[CellGenerator.UP]) &&
-			(cell.y == num_rows - 1 || !cell.connect[CellGenerator.DOWN]) &&
-			cell.connect[CellGenerator.LEFT] != cell.connect[CellGenerator.RIGHT]
-		):
-			cell.is_shrink_width_candidate = true;
+			#   _
+			#  |_
+			#  
+			#  or
+			#   _
+			#   _|
+			# 
+			if (
+				(cell.y == 0 || !cell.connect[CellGenerator.UP]) &&
+				(cell.y == num_rows - 1 || !cell.connect[CellGenerator.DOWN]) &&
+				cell.connect[CellGenerator.LEFT] != cell.connect[CellGenerator.RIGHT]
+			):
+				cell.is_shrink_width_candidate = true;
 
 func _choose_tall_rows() -> void:
+	# From top left, find a row that can be raised before hitting the ghost house
 	for y in range(3):
-		var cell := cells[y * num_columns];
+		var cell := _get_cell(0, y);
 		if (cell.is_raise_height_candidate && _can_raise_height(0, y)):
 			cell.raise_height = true;
 			tall_rows[cell.x] = cell.y;
@@ -127,8 +123,8 @@ func _can_raise_height(x: int, y: int) -> bool:
 	var selected_cell: BaseCell;
 	var right_cell: BaseCell;
 
-	for row_index in range(y, 0, -1):
-		selected_cell = cells[x + row_index * num_columns];
+	for row_index in range(y, -1, -1):
+		selected_cell = _get_cell(x, row_index);
 		right_cell = selected_cell.next[CellGenerator.RIGHT];
 		if (
 			(!selected_cell.connect[CellGenerator.UP] || _is_cell_cross_center(selected_cell)) &&
@@ -140,20 +136,19 @@ func _can_raise_height(x: int, y: int) -> bool:
 	var raise_candidates: Array[BaseCell] = [];
 	var down_cell := right_cell;
 	while (down_cell):
-		if (right_cell.is_raise_height_candidate):
-			raise_candidates.append(right_cell);
+		if (down_cell.is_raise_height_candidate):
+			raise_candidates.append(down_cell);
 
 		# Cant go any further down
 		if (
-			(!right_cell.connect[CellGenerator.DOWN] || _is_cell_cross_center(right_cell)) &&
-			(!right_cell.next[CellGenerator.LEFT].connect[CellGenerator.DOWN] || _is_cell_cross_center(right_cell.next[CellGenerator.LEFT]))
+			(!down_cell.connect[CellGenerator.DOWN] || _is_cell_cross_center(down_cell)) &&
+			(!down_cell.next[CellGenerator.LEFT].connect[CellGenerator.DOWN] || _is_cell_cross_center(down_cell.next[CellGenerator.LEFT]))
 		):
 			break;
 
 		down_cell = down_cell.next[CellGenerator.DOWN];
 
 	# TODO: Shuffle candidates
-
 	for selection in raise_candidates:
 		if (_can_raise_height(selection.x, selection.y)):
 			selection.raise_height = true;
@@ -164,25 +159,23 @@ func _can_raise_height(x: int, y: int) -> bool:
 
 func _choose_narrow_columns() -> void:
 	# Count columns from outside in
-	for x in range(num_columns - 1, 0, -1):
-		var cell := cells[x];
+	for x in range(num_columns - 1, -1, -1):
+		var cell := _get_cell(x, 0);
 		if (cell.is_shrink_width_candidate && _can_shrink_width(x, 0)):
 			cell.shrink_width = true;
 			narrow_columns[cell.y] = cell.x;
-			print("CHOSE NARROW: ", cell.y);
 			break;
 
 func _can_shrink_width(x: int, y: int) -> bool:
 	## At end of map so safe to expand
 	if (y == num_rows - 1):
-		print("END MAP?")
 		return true;
 
 	# Walk on the right hand side of cells
 	var selected_cell: BaseCell;
 	var down_cell: BaseCell;
-	for column_index in range(num_columns):
-		selected_cell = cells[column_index + y * num_columns];
+	for column_index in range(x, num_columns):
+		selected_cell = _get_cell(column_index, y);
 		down_cell = selected_cell.next[CellGenerator.DOWN];
 		if (
 			(!selected_cell.connect[CellGenerator.RIGHT] || _is_cell_cross_center(selected_cell)) &&
@@ -209,12 +202,9 @@ func _can_shrink_width(x: int, y: int) -> bool:
 	
 	for selection in left_candidates:
 		if (_can_shrink_width(selection.x, selection.y)):
-			print("SHRINK DAT");
 			selection.shrink_width = true;
 			narrow_columns[selection.y] = selection.x;
 			return true;
-		else:
-			print("CANT SHRINK: ", selection.x, ", ", selection.y)
 	
 	return false;
 
@@ -223,3 +213,7 @@ func _is_cell_cross_center(cell: BaseCell) -> bool:
 		cell.connect[CellGenerator.RIGHT] && \
 		cell.connect[CellGenerator.DOWN] &&  \
 		cell.connect[CellGenerator.LEFT];
+
+# Get the base tile at coordinates
+func _get_cell(x: int, y: int) -> BaseCell:
+	return cells[x][y];

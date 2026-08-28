@@ -29,16 +29,28 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("1_k2qge")
+draw_single_dead_end = false
+draw_double_dead_end = false
+draw_void_tunnel_candidate = false
+draw_edge_tunnel_candidate = false
 
-[node name="TileViewer" type="Control" parent="MarginContainer/HBoxContainer" unique_id=413881967]
+[node name="TileView" type="Control" parent="MarginContainer/HBoxContainer" unique_id=248686138]
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_2j1qg")
 
-[node name="Button" type="Button" parent="MarginContainer/HBoxContainer" unique_id=303470287]
+[node name="Container" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=1352706841]
 layout_mode = 2
-text = "Regen"
 
-[connection signal="on_generator_run_complete" from="MarginContainer/HBoxContainer/CellViewer" to="MarginContainer/HBoxContainer/TileViewer" method="_on_cell_generator_run"]
-[connection signal="failed_resize" from="MarginContainer/HBoxContainer/TileViewer" to="MarginContainer/HBoxContainer/CellViewer" method="run"]
-[connection signal="pressed" from="MarginContainer/HBoxContainer/Button" to="MarginContainer/HBoxContainer/TileViewer" method="_gen"]
+[node name="Button" type="Button" parent="MarginContainer/HBoxContainer/Container" unique_id=303470287]
+layout_mode = 2
+text = "Regen Cells"
+
+[node name="Button2" type="Button" parent="MarginContainer/HBoxContainer/Container" unique_id=1153332257]
+layout_mode = 2
+text = "Regen Tiles"
+
+[connection signal="on_generator_run_complete" from="MarginContainer/HBoxContainer/CellViewer" to="MarginContainer/HBoxContainer/TileView" method="_on_cell_generator_run"]
+[connection signal="failed_resize" from="MarginContainer/HBoxContainer/TileView" to="MarginContainer/HBoxContainer/CellViewer" method="run"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/Container/Button" to="MarginContainer/HBoxContainer/CellViewer" method="run"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/Container/Button2" to="MarginContainer/HBoxContainer/TileView" method="_gen"]
