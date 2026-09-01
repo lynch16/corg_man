@@ -25,6 +25,7 @@ var tile_color_map: Dictionary[TileGenerator.TileType, Color] = {
 
 var tile_generator: TileGenerator;
 var cell_generator: CellGenerator;
+var map_generator: MapGenerator = MapGenerator.new();
 
 var has_loaded := false;
 
@@ -36,59 +37,9 @@ func _ready() -> void:
 
 func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
 	cell_generator = p_cell_gen;
-
-	run();
-
-func run() -> void:
-	# TODO: Resizing to final map doesn't work
-	# _resize_and_gen();
-	_resize_static();
-
-func _resize_and_gen() -> void:
-	var resizer := CellTileResizer.new(
-		cell_generator.cells,
-		cell_generator.num_rows,
-		cell_generator.num_columns
-	)
-	var resized_cells := resizer.upscale();
-	if (!resized_cells.size()):
-		if (num_reruns < max_reruns):
-			num_reruns += 1;
-			failed_resize.emit();
-		else:
-			print_debug("Reached max resize failures")
-		return;
-
-	tile_generator = TileGenerator.new(
-		resized_cells,
-		resizer.num_rows,
-		resizer.num_columns
-	);
-	_gen();
-	num_reruns = 0;
-
-func _resize_static() -> void:
-	var tile_cells: Array[Array] = [];
-	tile_cells.resize(cell_generator.num_columns);
-	for x in range(cell_generator.num_columns):
-		tile_cells[x] = [];
-		tile_cells[x].resize(cell_generator.num_rows);
-		for y in range(cell_generator.num_rows):
-			var cell = cell_generator._get_cell(x, y);
-			var tc := TileCell.from(cell);
-			tc.x = tc.x * CellTileResizer.TILE_SCALE;
-			tc.y = tc.y * CellTileResizer.TILE_SCALE;
-			tile_cells[x][y] = tc;
-		
-	tile_generator = TileGenerator.new(
-		tile_cells,
-		cell_generator.num_rows,
-		cell_generator.num_columns
-	);
-	_gen();
-
-func _gen() -> void:
-	tile_generator.generate();
+	map_generator.cell_generator = map_generator.cell_generator;
+	map_generator.run();
+	tile_generator = map_generator.tile_generator;
 	has_loaded = true;
 
 func _process(delta: float) -> void:
