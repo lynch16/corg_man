@@ -3,8 +3,8 @@ extends Control
 
 @export var grid_color := Color(0, 0, 0, 0.3);
 
-@export var tile_null_color := Color(255, 0, 0, 1.0); # Light Red
-@export var tile_unassigned_color := Color(0, 0, 0, 0); # White
+@export var tile_null_color := Color(255, 0, 0, 1.0); # Bright Red
+@export var tile_unassigned_color := Color(255, 0, 0, 0.4); # Light Red
 @export var tile_wall_color := Color(0, 0, 255, 0.4); # Blue
 @export var tile_pellet_color := Color(0, 0, 0, 0.2); # Grey
 @export var tile_energizer_color := Color(255, 255, 0, 0.4); # Yellow
@@ -37,9 +37,12 @@ func _ready() -> void:
 func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
 	cell_generator = p_cell_gen;
 
+	run();
+
+func run() -> void:
 	# TODO: Resizing to final map doesn't work
-	_resize_and_gen();
-	# _resize_static();
+	# _resize_and_gen();
+	_resize_static();
 
 func _resize_and_gen() -> void:
 	var resizer := CellTileResizer.new(

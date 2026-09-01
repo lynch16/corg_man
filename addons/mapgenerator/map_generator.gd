@@ -11,13 +11,9 @@ func run() -> void:
 
 func run_until_ready(current_run: int) -> void:
 	cell_generator.run();
-	
-	var resizer := CellTileResizer.new(
-		cell_generator.cells,
-		cell_generator.num_rows,
-		cell_generator.num_columns
-	)
-	var resized_cells := resizer.upscale();
+	# var resized_cells := _resize_dynamic();
+	var resized_cells := _resize_static();
+
 	if (!resized_cells.size()):
 		if (current_run < max_reruns):
 			current_run += 1;
@@ -28,7 +24,31 @@ func run_until_ready(current_run: int) -> void:
 
 	tile_generator = TileGenerator.new(
 		resized_cells,
-		resizer.num_rows,
-		resizer.num_columns
+		cell_generator.num_rows,
+		cell_generator.num_columns
 	);
 	tile_generator.generate();
+
+func _resize_dynamic() -> Array[Array]:
+	var resizer := CellTileResizer.new(
+		cell_generator.cells,
+		cell_generator.num_rows,
+		cell_generator.num_columns
+	)
+	var resized_cells := resizer.upscale();
+	return resized_cells;
+
+func _resize_static() -> Array[Array]:
+	var tile_cells: Array[Array] = [];
+	tile_cells.resize(cell_generator.num_columns);
+	for x in range(cell_generator.num_columns):
+		tile_cells[x] = [];
+		tile_cells[x].resize(cell_generator.num_rows);
+		for y in range(cell_generator.num_rows):
+			var cell = cell_generator._get_cell(x, y);
+			var tc := TileCell.from(cell);
+			tc.x = tc.x * CellTileResizer.TILE_SCALE;
+			tc.y = tc.y * CellTileResizer.TILE_SCALE;
+			tile_cells[x][y] = tc;
+
+	return tile_cells;
