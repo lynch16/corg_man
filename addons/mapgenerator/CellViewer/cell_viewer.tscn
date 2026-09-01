@@ -53,4 +53,4 @@ text = "Regen Tiles"
 [connection signal="on_generator_run_complete" from="MarginContainer/HBoxContainer/CellViewer" to="MarginContainer/HBoxContainer/TileView" method="_on_cell_generator_run"]
 [connection signal="failed_resize" from="MarginContainer/HBoxContainer/TileView" to="MarginContainer/HBoxContainer/CellViewer" method="run"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/Container/Button" to="MarginContainer/HBoxContainer/CellViewer" method="run"]
-[connection signal="pressed" from="MarginContainer/HBoxContainer/Container/Button2" to="MarginContainer/HBoxContainer/TileView" method="_gen"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/Container/Button2" to="MarginContainer/HBoxContainer/TileView" method="_resize_and_gen"]

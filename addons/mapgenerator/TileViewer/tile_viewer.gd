@@ -62,6 +62,7 @@ func _resize_and_gen() -> void:
 		resizer.num_columns
 	);
 	_gen();
+	num_reruns = 0;
 
 func _resize_static() -> void:
 	var tile_cells: Array[Array] = [];
