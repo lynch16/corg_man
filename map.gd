@@ -1,11 +1,18 @@
 extends Node2D
 
-@onready var tile_map_layer: TileMapLayer = $TileMapLayer;
+@export var map_textures: Array[CompressedTexture2D] = [];
 
 var map_gen: MapGenerator = MapGenerator.new();
 
+@onready var tile_map_layer: TileMapLayer = $TileMapLayer;
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	var source: TileSetAtlasSource = tile_map_layer.tile_set.get_source(1);
+	
+	var new_texture_idx := randi() % map_textures.size();
+
+	source.texture = map_textures[new_texture_idx];
 	map_gen.run();
 	var num_tile_rows := map_gen.tile_generator.num_tile_rows;
 	var num_tile_columns := map_gen.tile_generator.num_tile_columns;
