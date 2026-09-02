@@ -33,11 +33,14 @@ draw_single_dead_end = false
 draw_double_dead_end = false
 draw_void_tunnel_candidate = false
 draw_edge_tunnel_candidate = false
+draw_height_adjustments = false
+draw_width_adjustments = false
 
 [node name="TileView" type="Control" parent="MarginContainer/HBoxContainer" unique_id=248686138]
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("2_2j1qg")
+tile_unassigned_color = Color(0, 0, 0, 0)
 
 [node name="Container" type="VBoxContainer" parent="MarginContainer/HBoxContainer" unique_id=1352706841]
 layout_mode = 2
@@ -53,4 +56,4 @@ text = "Regen Tiles"
 [connection signal="on_generator_run_complete" from="MarginContainer/HBoxContainer/CellViewer" to="MarginContainer/HBoxContainer/TileView" method="_on_cell_generator_run"]
 [connection signal="failed_resize" from="MarginContainer/HBoxContainer/TileView" to="MarginContainer/HBoxContainer/CellViewer" method="run"]
 [connection signal="pressed" from="MarginContainer/HBoxContainer/Container/Button" to="MarginContainer/HBoxContainer/CellViewer" method="run"]
-[connection signal="pressed" from="MarginContainer/HBoxContainer/Container/Button2" to="MarginContainer/HBoxContainer/TileView" method="_gen"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/Container/Button2" to="MarginContainer/HBoxContainer/TileView" method="run"]

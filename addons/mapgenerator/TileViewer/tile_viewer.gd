@@ -3,8 +3,8 @@ extends Control
 
 @export var grid_color := Color(0, 0, 0, 0.3);
 
-@export var tile_null_color := Color(255, 0, 0, 1.0); # Light Red
-@export var tile_unassigned_color := Color(0, 0, 0, 0); # White
+@export var tile_null_color := Color(255, 0, 0, 1.0); # Bright Red
+@export var tile_unassigned_color := Color(255, 0, 0, 0.4); # Light Red
 @export var tile_wall_color := Color(0, 0, 255, 0.4); # Blue
 @export var tile_pellet_color := Color(0, 0, 0, 0.2); # Grey
 @export var tile_energizer_color := Color(255, 255, 0, 0.4); # Yellow
@@ -25,6 +25,7 @@ var tile_color_map: Dictionary[TileGenerator.TileType, Color] = {
 
 var tile_generator: TileGenerator;
 var cell_generator: CellGenerator;
+var map_generator: MapGenerator = MapGenerator.new();
 
 var has_loaded := false;
 
@@ -36,55 +37,9 @@ func _ready() -> void:
 
 func _on_cell_generator_run(p_cell_gen: CellGenerator) -> void:
 	cell_generator = p_cell_gen;
-
-	# TODO: Resizing to final map doesn't work
-	_resize_and_gen();
-	# _resize_static();
-
-func _resize_and_gen() -> void:
-	var resizer := CellTileResizer.new(
-		cell_generator.cells,
-		cell_generator.num_rows,
-		cell_generator.num_columns
-	)
-	var resized_cells := resizer.upscale();
-	if (!resized_cells.size()):
-		if (num_reruns < max_reruns):
-			num_reruns += 1;
-			failed_resize.emit();
-		else:
-			print_debug("Reached max resize failures")
-		return;
-
-	tile_generator = TileGenerator.new(
-		resized_cells,
-		resizer.num_rows,
-		resizer.num_columns
-	);
-	_gen();
-
-func _resize_static() -> void:
-	var tile_cells: Array[Array] = [];
-	tile_cells.resize(cell_generator.num_columns);
-	for x in range(cell_generator.num_columns):
-		tile_cells[x] = [];
-		tile_cells[x].resize(cell_generator.num_rows);
-		for y in range(cell_generator.num_rows):
-			var cell = cell_generator._get_cell(x, y);
-			var tc := TileCell.from(cell);
-			tc.x = tc.x * CellTileResizer.TILE_SCALE;
-			tc.y = tc.y * CellTileResizer.TILE_SCALE;
-			tile_cells[x][y] = tc;
-		
-	tile_generator = TileGenerator.new(
-		tile_cells,
-		cell_generator.num_rows,
-		cell_generator.num_columns
-	);
-	_gen();
-
-func _gen() -> void:
-	tile_generator.generate();
+	map_generator.cell_generator = map_generator.cell_generator;
+	map_generator.run();
+	tile_generator = map_generator.tile_generator;
 	has_loaded = true;
 
 func _process(delta: float) -> void:
