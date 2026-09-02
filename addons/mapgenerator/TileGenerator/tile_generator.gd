@@ -75,10 +75,8 @@ func generate() -> void:
 	_set_path_tiles();
 	_extend_tunnels();
 	_set_ghost_house();
+	_fill_walls();
 	
-	# TODO: Using simple wall fill algorithm
-	# _fill_walls();
-	_fill_unassigned_as_walls();
 
 	# _set_energizers();
 	_clean_path_tunnels_and_ghost_house();
@@ -144,7 +142,7 @@ func _fill_walls() -> void:
 		for x in range(num_tile_columns):
 			# Unassigned tiles that share vertex with path tiles are walls
 			# Check all tiles in circular pattern (fill in corners)
-			if (_get_tile(x, y) != TileType.Pellet && (
+			if (_get_tile(x, y) == TileType.Unassigned && (
 					_get_tile(x - 1, y) == TileType.Pellet ||
 					_get_tile(x + 1, y) == TileType.Pellet ||
 					_get_tile(x, y - 1) == TileType.Pellet ||
@@ -162,11 +160,36 @@ func _set_ghost_house() -> void:
 	var center_ghost_column := 2;
 	var ghost_house_height := 3;
 	var ghost_house_half_width := 3;
+
+	# Set house walls on top and bottom. 
 	for x1 in range(ghost_house_half_width):
+		var x := x1 + center_ghost_column;
+		_set_tile(x, top_ghost_row, TileType.Wall);
+		_set_tile(x, top_ghost_row + ghost_house_height + 1, TileType.Wall);
+
 		for y1 in range(ghost_house_height):
-			var x := x1 + center_ghost_column;
 			var y := y1 + top_ghost_row + 1; # Add 1 here to account for top ghost house wall
 			_set_tile(x, y, TileType.Blank);
+
+	# Set house walls on sides
+	for y1 in range(ghost_house_height + 2):
+		var y := y1 + top_ghost_row;
+		_set_tile(center_ghost_column + ghost_house_half_width, y, TileType.Wall);
+
+	# Set pellets (path) around house - top and bottom
+	for x1 in range(ghost_house_half_width + 1):
+		var x := x1 + center_ghost_column;
+		_set_tile(x, top_ghost_row - 1, TileType.Pellet);
+		_set_tile(x, top_ghost_row + ghost_house_height + 2, TileType.Pellet);
+
+	# Set pellets (path) around house - sides
+	for y1 in range(ghost_house_height + 4):
+		var y := y1 + top_ghost_row - 1;
+		_set_tile(
+			center_ghost_column + ghost_house_half_width + 1,
+			y,
+			TileType.Pellet
+		)
 
 	_set_tile(center_ghost_column, top_ghost_row, TileType.Door);
 	
