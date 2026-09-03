@@ -16,8 +16,8 @@ func _set_player_spawn_position() -> void:
 	var start_row := map.map_gen.tile_generator.num_tile_rows - 8 - TileGenerator.ROW_RAISE_OFFSET + 1.5; # Adding 0.5 due to player's pivot point being in center
 	var start_column := map.map_gen.tile_generator.num_mid_columns + 1;
 
-	player_spawn.global_position = Vector2(
-		global_position.x + start_column * 16,
-		global_position.y + start_row * 16,
-	)
+	# TODO: This should align to tile size of tile map
+	var new_position := Vector2(start_column * 16, start_row * 16);
+
+	player_spawn.global_position = (global_position + new_position);
 

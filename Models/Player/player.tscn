@@ -1,39 +1,35 @@
-[gd_scene format=4 uid="uid://moxkwo3nfsf4"]
+[gd_scene format=3 uid="uid://moxkwo3nfsf4"]
 
 [ext_resource type="Script" uid="uid://bdkr3l4m53lbd" path="res://Models/Player/player.gd" id="1_4flbx"]
 [ext_resource type="Resource" uid="uid://c34kcdtry0kq5" path="res://Models/Player/player_movement_stats.tres" id="2_o3uiv"]
 [ext_resource type="Resource" uid="uid://cwpyp4d8gta26" path="res://Models/Player/player_health_stats.tres" id="3_2s1t8"]
 [ext_resource type="Resource" uid="uid://dcmq7tlmfu6ie" path="res://Models/Player/player_combat_stats.tres" id="3_o7pk3"]
+[ext_resource type="Texture2D" uid="uid://cyuw4jbapcbie" path="res://Assets/Sprites/Basic Sprites 1x.png" id="5_o7pk3"]
 [ext_resource type="Script" uid="uid://cuecudo47i27o" path="res://Models/EntityModules/Damage/Hurt/hurtbox_2d.gd" id="5_yttkf"]
 [ext_resource type="Script" uid="uid://ckluymmkmha10" path="res://Models/EntityModules/Movement/movement_controller.gd" id="8_o3uiv"]
 [ext_resource type="Script" uid="uid://v4gqslu6ep4x" path="res://Models/EntityModules/Movement/input_controller.gd" id="9_o7pk3"]
 [ext_resource type="Script" uid="uid://dhchi74lu51yr" path="res://Models/EntityModules/Damage/Hurt/DamageResults/apply_damage_result.gd" id="10_m1agk"]
 [ext_resource type="Script" uid="uid://dirc5lq54ahsv" path="res://Models/EntityModules/Damage/Hurt/DamageResults/stop_on_death_result.gd" id="14_e20tc"]
 
-[sub_resource type="PortableCompressedTexture2D" id="PortableCompressedTexture2D_sh265"]
-_data = PackedByteArray("AAADAAUAAAABAAAAIAAAACAAAABeAAAAUklGRlYAAABXRUJQVlA4TEoAAAAvH8AHEA8wCpMwFPMf8GATyVYk9g6RgBSkgTSkIIFw7wneExHR/wkIdQqmLa4fbkR3Jvdm9xcHpsIkDRbpcMiAKCckeSHLD0XwAA==")
-size_override = Vector2(32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_4flbx"]
-atlas = SubResource("PortableCompressedTexture2D_sh265")
-region = Rect2(0, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_m1agk"]
+atlas = ExtResource("5_o7pk3")
+region = Rect2(18, 0, 18, 18)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_onrkg"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_4flbx")
+"texture": SubResource("AtlasTexture_m1agk")
 }],
 "loop": 1,
 "name": &"default",
 "speed": 10.0
 }]
 
-[sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_sh265"]
-points = PackedVector2Array(-18, 15.000001, -8.742278e-07, -20, 20, 14.999999)
+[sub_resource type="CircleShape2D" id="CircleShape2D_o7pk3"]
+radius = 7.0
 
 [node name="Player" type="CharacterBody2D" unique_id=818107462 groups=["player"]]
-scale = Vector2(0.3, 0.3)
 motion_mode = 1
 script = ExtResource("1_4flbx")
 movement_stats = ExtResource("2_o3uiv")
@@ -43,7 +39,6 @@ combat_stats = ExtResource("3_o7pk3")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1526374553]
 z_index = 1
 texture_filter = 1
-rotation = 1.5707964
 sprite_frames = SubResource("SpriteFrames_onrkg")
 metadata/_aseprite_wizard_interface_config_ = {
 "pending_changes": {}
@@ -64,8 +59,8 @@ metadata/_aseprite_wizard_config_ = {
 metadata/_aseprite_wizard_source_file_hash_ = "89274d3e70cc8630f7b9b9aa5c35e4c5"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1160935763]
-rotation = 1.5707964
-shape = SubResource("ConvexPolygonShape2D_sh265")
+position = Vector2(-1, 1)
+shape = SubResource("CircleShape2D_o7pk3")
 
 [node name="Hurtbox2D" type="Area2D" parent="." unique_id=757079361 node_paths=PackedStringArray("owner_node")]
 unique_name_in_owner = true
@@ -75,8 +70,9 @@ script = ExtResource("5_yttkf")
 owner_node = NodePath("..")
 metadata/_custom_type_script = "uid://cuecudo47i27o"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox2D" unique_id=1088582691]
-shape = SubResource("ConvexPolygonShape2D_sh265")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox2D" unique_id=301693776]
+position = Vector2(1, 0.9999998)
+shape = SubResource("CircleShape2D_o7pk3")
 
 [node name="ApplyDamageResult" type="Node" parent="Hurtbox2D" unique_id=1210662983]
 script = ExtResource("10_m1agk")

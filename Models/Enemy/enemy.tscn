@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://bhivcoamxxg4n"]
+
+[ext_resource type="Script" uid="uid://ccmuearcodtas" path="res://Models/Enemy/enemy.gd" id="1_pipm3"]
+[ext_resource type="Script" uid="uid://wmd6w6j2858o" path="res://Models/EntityModules/Damage/combat_stats.gd" id="2_eowg7"]
+[ext_resource type="Script" uid="uid://d1adag40dhb61" path="res://Models/EntityModules/Damage/health_stats.gd" id="2_s2vdc"]
+[ext_resource type="Script" uid="uid://cuecudo47i27o" path="res://Models/EntityModules/Damage/Hurt/hurtbox_2d.gd" id="4_utaga"]
+[ext_resource type="PackedScene" uid="uid://tjlvf8cvvy0p" path="res://Models/EntityModules/Movement/vision_area.tscn" id="5_mb64x"]
+[ext_resource type="Script" uid="uid://dhchi74lu51yr" path="res://Models/EntityModules/Damage/Hurt/DamageResults/apply_damage_result.gd" id="5_u1nat"]
+[ext_resource type="Texture2D" uid="uid://cyuw4jbapcbie" path="res://Assets/Sprites/Basic Sprites 1x.png" id="7_byl56"]
+[ext_resource type="Script" uid="uid://dirc5lq54ahsv" path="res://Models/EntityModules/Damage/Hurt/DamageResults/stop_on_death_result.gd" id="8_hifkv"]
+[ext_resource type="Script" uid="uid://ckluymmkmha10" path="res://Models/EntityModules/Movement/movement_controller.gd" id="10_ae6k3"]
+[ext_resource type="Script" uid="uid://dhokcbqo4g1fw" path="res://Models/EntityModules/Damage/Hit/hitbox_2d.gd" id="15_fv5yk"]
+[ext_resource type="Script" uid="uid://cf2a6ah5g3aox" path="res://Models/EntityModules/Movement/movement_stats.gd" id="16_l403r"]
+
+[sub_resource type="Resource" id="Resource_l403r"]
+resource_local_to_scene = true
+script = ExtResource("2_s2vdc")
+initial_health = 1.0
+faction = 1
+metadata/_custom_type_script = "uid://d1adag40dhb61"
+
+[sub_resource type="Resource" id="Resource_eowg7"]
+resource_local_to_scene = true
+script = ExtResource("2_eowg7")
+faction = 1
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eowg7"]
+size = Vector2(14.5, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s2vdc"]
+atlas = ExtResource("7_byl56")
+region = Rect2(54, 18, 18, 18)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sgqbr"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s2vdc")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 10.0
+}]
+
+[sub_resource type="Resource" id="Resource_27fgy"]
+script = ExtResource("16_l403r")
+min_speed = 10000.0
+max_speed = 10000.0
+metadata/_custom_type_script = "uid://cf2a6ah5g3aox"
+
+[node name="Enemy" type="CharacterBody2D" unique_id=1983692498]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_pipm3")
+health_stats = SubResource("Resource_l403r")
+combat_stats = SubResource("Resource_eowg7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1339700338]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_eowg7")
+
+[node name="Hurtbox2D" type="Area2D" parent="." unique_id=1516620444 node_paths=PackedStringArray("owner_node")]
+unique_name_in_owner = true
+script = ExtResource("4_utaga")
+owner_node = NodePath("..")
+metadata/_custom_type_script = "uid://cuecudo47i27o"
+
+[node name="ApplyDamageResult" type="Node" parent="Hurtbox2D" unique_id=491735194]
+script = ExtResource("5_u1nat")
+metadata/_custom_type_script = "uid://dhchi74lu51yr"
+
+[node name="StopOnDeathDamageResult" type="Node" parent="Hurtbox2D" unique_id=319848720]
+unique_name_in_owner = true
+script = ExtResource("8_hifkv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox2D" unique_id=1834965455]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_eowg7")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=554559173]
+z_index = 4
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_sgqbr")
+metadata/_aseprite_wizard_interface_config_ = {
+"pending_changes": {}
+}
+metadata/_aseprite_wizard_config_ = {
+"embed_tex": true,
+"layers": [],
+"o_ex_p": "",
+"o_folder": "",
+"o_name": "",
+"only_visible": false,
+"scale": "1.0",
+"should_round_fps": true,
+"slice": "",
+"source": "res://sprites/enemy.aseprite",
+"source_uid": 8239596659803515985
+}
+metadata/_aseprite_wizard_source_file_hash_ = "c56c9e95aac049837ecce06eb0bca3af"
+
+[node name="VisionArea" parent="." unique_id=1974026706 instance=ExtResource("5_mb64x")]
+view_distance = 400
+debug = false
+
+[node name="BoundaryManager" type="Node2D" parent="." unique_id=410091724]
+
+[node name="Hitbox2D" type="Area2D" parent="." unique_id=2043503987 node_paths=PackedStringArray("owner_node")]
+script = ExtResource("15_fv5yk")
+owner_node = NodePath("..")
+metadata/_custom_type_script = "uid://dhokcbqo4g1fw"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox2D" unique_id=723002370]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_eowg7")
+
+[node name="MovementController" type="Node2D" parent="." unique_id=1284584049 node_paths=PackedStringArray("moveable_character")]
+script = ExtResource("10_ae6k3")
+movement_stats = SubResource("Resource_27fgy")
+moveable_character = NodePath("..")
+metadata/_custom_type_script = "uid://ckluymmkmha10"
