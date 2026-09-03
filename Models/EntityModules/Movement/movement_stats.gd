@@ -6,11 +6,7 @@ extends Resource
 	set(val):
 		# TODO: https://github.com/godotengine/godot/pull/115649
 		min_speed = val;
-		prints("val", val);
-		prints("MAX", max_speed);
-		prints("min_speed", min_speed);
 		current_speed = current_speed;
-		prints("current_speed", current_speed);
 ## Max speed the character can go
 @export var max_speed: float:
 	set(val):

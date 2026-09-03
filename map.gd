@@ -1,3 +1,4 @@
+class_name Map
 extends Node2D
 
 @export var map_textures: Array[CompressedTexture2D] = [];

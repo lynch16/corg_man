@@ -8,6 +8,5 @@
 script = ExtResource("1_vonw3")
 
 [node name="PlayerSpawn" parent="." unique_id=90593702 instance=ExtResource("2_oi3di")]
-position = Vector2(352, 231)
 
 [node name="Map" parent="." unique_id=1997149468 instance=ExtResource("2_0b4ue")]
