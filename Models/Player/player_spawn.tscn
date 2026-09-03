@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://423u2ig3bkp0"]
+
+[ext_resource type="Script" uid="uid://j1vac41fychy" path="res://Models/Player/player_spawn.gd" id="1_pus8w"]
+[ext_resource type="PackedScene" uid="uid://moxkwo3nfsf4" path="res://Models/Player/player.tscn" id="2_vs6q3"]
+
+[node name="PlayerSpawn" type="Node2D" unique_id=90593702]
+script = ExtResource("1_pus8w")
+player_scene = ExtResource("2_vs6q3")

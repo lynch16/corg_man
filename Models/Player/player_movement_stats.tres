@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MovementStats" format=3 uid="uid://c34kcdtry0kq5"]
+
+[ext_resource type="Script" uid="uid://cf2a6ah5g3aox" path="res://Models/EntityModules/Movement/movement_stats.gd" id="1_nmb3u"]
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_nmb3u")
+min_speed = 10000.0
+max_speed = 10000.0
+acceleration = 150.0
+rotation_speed = 2.0
+metadata/_custom_type_script = "uid://cf2a6ah5g3aox"
