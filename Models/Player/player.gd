@@ -23,6 +23,7 @@ func _ready() -> void:
 	# Register broadcast handler and emit initial health state
 	health_stats.on_health_changed.connect(_handle_player_damage);
 	health_stats.on_health_depleted.connect(_die);
+	Blackboard.set_player(self);
 	
 	# Call deferred so that Damageble handlers can connect before initial broadcast to HUD
 	# SignalBus._on_player_health_updated(int(health_stats.current_health));

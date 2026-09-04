@@ -71,7 +71,7 @@ owner_node = NodePath("..")
 metadata/_custom_type_script = "uid://cuecudo47i27o"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox2D" unique_id=301693776]
-position = Vector2(1, 0.9999998)
+position = Vector2(0.9999995, 0.99999905)
 shape = SubResource("CircleShape2D_o7pk3")
 
 [node name="ApplyDamageResult" type="Node" parent="Hurtbox2D" unique_id=1210662983]

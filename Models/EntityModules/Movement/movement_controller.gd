@@ -3,7 +3,6 @@ extends Node2D
 ## Move in grid like pattern
 ## Checks that can move before doing so
 
-
 @export var movement_stats: MovementStats;
 @export var moveable_character: CharacterBody2D;
 
@@ -33,7 +32,3 @@ func move_left(delta: float) -> void:
 func move_right(delta: float) -> void:
 	direction = Vector2.RIGHT;
 	_move_direction(delta);
-
-
-func _on_input_controller_input_left(delta: float) -> void:
-	pass # Replace with function body.

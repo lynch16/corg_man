@@ -3,6 +3,22 @@
 [ext_resource type="Script" uid="uid://bkv1jynkruln4" path="res://level.gd" id="1_vonw3"]
 [ext_resource type="PackedScene" uid="uid://btohf7n7svwpn" path="res://map.tscn" id="2_0b4ue"]
 [ext_resource type="PackedScene" uid="uid://423u2ig3bkp0" path="res://Models/Player/player_spawn.tscn" id="2_oi3di"]
+[ext_resource type="PackedScene" uid="uid://bhivcoamxxg4n" path="res://Models/Enemy/enemy.tscn" id="4_1ainy"]
+[ext_resource type="Script" uid="uid://d1adag40dhb61" path="res://Models/EntityModules/Damage/health_stats.gd" id="5_n6hdu"]
+[ext_resource type="Script" uid="uid://wmd6w6j2858o" path="res://Models/EntityModules/Damage/combat_stats.gd" id="6_km5ld"]
+[ext_resource type="PackedScene" uid="uid://blaagacllcgbw" path="res://UI/debug_hud.tscn" id="7_n6hdu"]
+
+[sub_resource type="Resource" id="Resource_n6hdu"]
+resource_local_to_scene = true
+script = ExtResource("5_n6hdu")
+initial_health = 1.0
+faction = 1
+metadata/_custom_type_script = "uid://d1adag40dhb61"
+
+[sub_resource type="Resource" id="Resource_km5ld"]
+resource_local_to_scene = true
+script = ExtResource("6_km5ld")
+faction = 1
 
 [node name="Level" type="Node2D" unique_id=1265118823]
 script = ExtResource("1_vonw3")
@@ -10,3 +26,9 @@ script = ExtResource("1_vonw3")
 [node name="PlayerSpawn" parent="." unique_id=90593702 instance=ExtResource("2_oi3di")]
 
 [node name="Map" parent="." unique_id=1997149468 instance=ExtResource("2_0b4ue")]
+
+[node name="Enemy" parent="." unique_id=1983692498 instance=ExtResource("4_1ainy")]
+health_stats = SubResource("Resource_n6hdu")
+combat_stats = SubResource("Resource_km5ld")
+
+[node name="HUD" parent="." unique_id=266332138 instance=ExtResource("7_n6hdu")]

@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://cyuw4jbapcbie" path="res://Assets/Sprites/Basic Sprites 1x.png" id="7_byl56"]
 [ext_resource type="Script" uid="uid://dirc5lq54ahsv" path="res://Models/EntityModules/Damage/Hurt/DamageResults/stop_on_death_result.gd" id="8_hifkv"]
 [ext_resource type="Script" uid="uid://ckluymmkmha10" path="res://Models/EntityModules/Movement/movement_controller.gd" id="10_ae6k3"]
+[ext_resource type="Script" uid="uid://dix6uobm5ebog" path="res://Models/EntityModules/Movement/a_star_grid_nav_controller.gd" id="12_p7ovo"]
 [ext_resource type="Script" uid="uid://dhokcbqo4g1fw" path="res://Models/EntityModules/Damage/Hit/hitbox_2d.gd" id="15_fv5yk"]
 [ext_resource type="Script" uid="uid://cf2a6ah5g3aox" path="res://Models/EntityModules/Movement/movement_stats.gd" id="16_l403r"]
 
@@ -23,9 +24,6 @@ metadata/_custom_type_script = "uid://d1adag40dhb61"
 resource_local_to_scene = true
 script = ExtResource("2_eowg7")
 faction = 1
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_eowg7"]
-size = Vector2(14.5, 12)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_s2vdc"]
 atlas = ExtResource("7_byl56")
@@ -42,40 +40,22 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_km5ld"]
+radius = 6.0
+
 [sub_resource type="Resource" id="Resource_27fgy"]
 script = ExtResource("16_l403r")
-min_speed = 10000.0
-max_speed = 10000.0
+min_speed = 5000.0
+max_speed = 5000.0
 metadata/_custom_type_script = "uid://cf2a6ah5g3aox"
 
 [node name="Enemy" type="CharacterBody2D" unique_id=1983692498]
+scale = Vector2(0.8, 0.8)
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("1_pipm3")
 health_stats = SubResource("Resource_l403r")
 combat_stats = SubResource("Resource_eowg7")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1339700338]
-position = Vector2(0, 2)
-shape = SubResource("RectangleShape2D_eowg7")
-
-[node name="Hurtbox2D" type="Area2D" parent="." unique_id=1516620444 node_paths=PackedStringArray("owner_node")]
-unique_name_in_owner = true
-script = ExtResource("4_utaga")
-owner_node = NodePath("..")
-metadata/_custom_type_script = "uid://cuecudo47i27o"
-
-[node name="ApplyDamageResult" type="Node" parent="Hurtbox2D" unique_id=491735194]
-script = ExtResource("5_u1nat")
-metadata/_custom_type_script = "uid://dhchi74lu51yr"
-
-[node name="StopOnDeathDamageResult" type="Node" parent="Hurtbox2D" unique_id=319848720]
-unique_name_in_owner = true
-script = ExtResource("8_hifkv")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox2D" unique_id=1834965455]
-position = Vector2(0, 2)
-shape = SubResource("RectangleShape2D_eowg7")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=554559173]
 z_index = 4
@@ -99,8 +79,31 @@ metadata/_aseprite_wizard_config_ = {
 }
 metadata/_aseprite_wizard_source_file_hash_ = "c56c9e95aac049837ecce06eb0bca3af"
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1339700338]
+position = Vector2(0, 1.2499999)
+shape = SubResource("CircleShape2D_km5ld")
+
+[node name="Hurtbox2D" type="Area2D" parent="." unique_id=1516620444 node_paths=PackedStringArray("owner_node")]
+unique_name_in_owner = true
+script = ExtResource("4_utaga")
+owner_node = NodePath("..")
+metadata/_custom_type_script = "uid://cuecudo47i27o"
+
+[node name="ApplyDamageResult" type="Node" parent="Hurtbox2D" unique_id=491735194]
+script = ExtResource("5_u1nat")
+metadata/_custom_type_script = "uid://dhchi74lu51yr"
+
+[node name="StopOnDeathDamageResult" type="Node" parent="Hurtbox2D" unique_id=319848720]
+unique_name_in_owner = true
+script = ExtResource("8_hifkv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox2D" unique_id=404926056]
+position = Vector2(0, 1.2499999)
+shape = SubResource("CircleShape2D_km5ld")
+
 [node name="VisionArea" parent="." unique_id=1974026706 instance=ExtResource("5_mb64x")]
-view_distance = 400
+position = Vector2(0, 1.2499999)
+view_distance = 100
 debug = false
 
 [node name="BoundaryManager" type="Node2D" parent="." unique_id=410091724]
@@ -110,12 +113,17 @@ script = ExtResource("15_fv5yk")
 owner_node = NodePath("..")
 metadata/_custom_type_script = "uid://dhokcbqo4g1fw"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox2D" unique_id=723002370]
-position = Vector2(0, 2)
-shape = SubResource("RectangleShape2D_eowg7")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox2D" unique_id=901220684]
+position = Vector2(0, 1.2500002)
+shape = SubResource("CircleShape2D_km5ld")
 
 [node name="MovementController" type="Node2D" parent="." unique_id=1284584049 node_paths=PackedStringArray("moveable_character")]
 script = ExtResource("10_ae6k3")
 movement_stats = SubResource("Resource_27fgy")
 moveable_character = NodePath("..")
 metadata/_custom_type_script = "uid://ckluymmkmha10"
+
+[node name="NavController" type="Node2D" parent="." unique_id=1529552098 node_paths=PackedStringArray("movement_controller")]
+script = ExtResource("12_p7ovo")
+movement_controller = NodePath("../MovementController")
+metadata/_custom_type_script = "uid://dix6uobm5ebog"

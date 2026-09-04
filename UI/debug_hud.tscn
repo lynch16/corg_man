@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://blaagacllcgbw"]
+
+[ext_resource type="Script" uid="uid://d0q1644vfjvxe" path="res://UI/debug_hud.gd" id="1_oe0x2"]
+
+[node name="HUD" type="Control" unique_id=266332138]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="DebugHUD" type="Control" parent="." unique_id=59998819]
+anchors_preset = 0
+offset_left = 10.0
+offset_top = 870.0
+offset_right = 10.0
+offset_bottom = 870.0
+script = ExtResource("1_oe0x2")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugHUD" unique_id=1450636836]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 320.0
+offset_bottom = 23.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+alignment = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="DebugHUD/VBoxContainer" unique_id=332365861]
+layout_mode = 2
+
+[node name="FPS_Label" type="Label" parent="DebugHUD/VBoxContainer/HBoxContainer" unique_id=1986166155]
+layout_mode = 2
+size_flags_horizontal = 0
+layout_direction = 2
+text = "FPS: "
+
+[node name="FPS_Value" type="Label" parent="DebugHUD/VBoxContainer/HBoxContainer" unique_id=2123970129]
+layout_mode = 2
+text = "0"
+
+[node name="MousePosition" type="Label" parent="DebugHUD/VBoxContainer/HBoxContainer" unique_id=1208552056]
+layout_mode = 2
+text = "(-1175.567, -809.9197)"

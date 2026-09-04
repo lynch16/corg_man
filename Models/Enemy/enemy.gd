@@ -5,6 +5,7 @@ extends CharacterBody2D
 @export var combat_stats: CombatStats;
 
 @onready var vision_area: VisionArea = get_node("VisionArea");
+@onready var nav_controller: AStarGridNavController = $NavController;
 
 var damageable: Damageable;
 var tracked_opponents: Array[Node2D] = [];
@@ -20,6 +21,21 @@ func _enter_tree() -> void:
 
 	hitbox = $Hitbox2D
 	hitbox.attacker_combat_stats = combat_stats;
+
+func _physics_process(delta: float) -> void:
+	_chase_player(delta);
+
+func _chase_player(delta: float) -> void:
+	var map := Blackboard.get_map();
+	var player := Blackboard.get_player();
+	if (!player): return;
+
+	var player_tile_pos := map.get_tile_from_position(player.global_position);
+
+	nav_controller.set_nav_target(Vector2i(player_tile_pos.x , player_tile_pos.y));
+	nav_controller._calculate_next_nav_path();
+	nav_controller.move_next_in_path(delta);
+
 
 # func _ready() -> void:
 # 	health_stats.on_health_depleted.connect(_die);

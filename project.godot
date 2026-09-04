@@ -14,6 +14,10 @@ config/name="Corg-Man"
 config/features=PackedStringArray("4.7")
 config/icon="res://icon.svg"
 
+[autoload]
+
+Blackboard="*uid://gx1enrm2yv45"
+
 [debug]
 
 gdscript/warnings/untyped_declaration=2
@@ -25,7 +29,7 @@ gdscript/warnings/unsafe_call_argument=2
 [display]
 
 window/size/viewport_width=1920
-window/size/viewport_height=1080
+window/size/viewport_height=900
 
 [editor_plugins]
 
