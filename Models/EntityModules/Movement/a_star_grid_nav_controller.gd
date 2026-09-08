@@ -1,6 +1,7 @@
 class_name AStarGridNavController extends Node2D
 
 const IS_SOLID_DATA_LAYER = "is_solid";
+const MOVE_TOLERANCE := 0.5;
 
 @export var movement_controller: MovementController;
 
@@ -14,6 +15,11 @@ var nav_path: Array[Vector2i];
 
 func _ready() -> void:
 	Blackboard.blackboard_updated.connect(_connect_map);
+
+func _process(delta: float) -> void:
+	move_next_in_path(delta);
+
+	queue_redraw();
 
 func _connect_map() -> void:
 	var map := Blackboard.get_map();
@@ -54,37 +60,41 @@ func _calculate_next_nav_path() -> void:
 
 	current_tile_pos = map.get_tile_from_position(movement_controller.moveable_character.global_position);
 	nav_path = _calculate_nav_path(current_tile_pos, target_tile_pos);
+	
+	if (nav_path.size() == 0): return;
+	next_path_tile = nav_path[0];
 
 func move_next_in_path(delta: float) -> void:
 	if (nav_path.size() == 0): return;
 
+	if (!next_path_tile || _has_reached_path()):
+		_calculate_next_nav_path();
+
+		if (next_path_tile == current_tile_pos):
+			next_path_tile = nav_path[1];
+		
+	if (next_path_tile):
+		var map := Blackboard.get_map();
+		var nav_delta := movement_controller.moveable_character.global_position - map.get_position_from_tile(next_path_tile);
+		
+		if (nav_delta.y > MOVE_TOLERANCE):
+			movement_controller.move_up(delta)
+		elif (nav_delta.y < -MOVE_TOLERANCE):
+			movement_controller.move_down(delta);
+		elif (nav_delta.x < -MOVE_TOLERANCE):
+			movement_controller.move_right(delta);
+		elif (nav_delta.x > MOVE_TOLERANCE):
+			movement_controller.move_left(delta);
+
+func _has_reached_path() -> bool:
 	var map := Blackboard.get_map();
-	next_path_tile = nav_path[0];
-	if (next_path_tile == current_tile_pos):
-		next_path_tile = nav_path[1];
-
 	var nav_delta := movement_controller.moveable_character.global_position - map.get_position_from_tile(next_path_tile);
-	
-	prints(nav_path)
-	prints("current_pos", current_tile_pos, movement_controller.moveable_character.global_position);
-	prints("Next_pos", next_path_tile, map.get_position_from_tile(next_path_tile))
-	prints("nav_delta", nav_delta);
-
-	if (nav_delta.y > 1):
-		movement_controller.move_up(delta)
-		prints("up", Vector2.UP);
-	elif (nav_delta.y < -1):
-		movement_controller.move_down(delta);
-		prints("down", Vector2.DOWN);
-	elif (nav_delta.x < -1):
-		movement_controller.move_right(delta);
-		prints("right", Vector2.RIGHT);
-	elif (nav_delta.x > 1):
-		movement_controller.move_left(delta);
-		prints("left", Vector2.LEFT);
-
-func _process(delta: float) -> void:
-	queue_redraw();
+	if (
+		nav_delta.x < MOVE_TOLERANCE && nav_delta.x > -MOVE_TOLERANCE && nav_delta.y < MOVE_TOLERANCE && nav_delta.y > -MOVE_TOLERANCE
+	):
+		return true;
+		
+	return false;
 
 func _draw() -> void:
 	var map := Blackboard.get_map();
