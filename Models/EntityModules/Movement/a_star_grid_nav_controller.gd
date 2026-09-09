@@ -17,8 +17,6 @@ func _ready() -> void:
 	Blackboard.blackboard_updated.connect(_connect_map);
 
 func _process(delta: float) -> void:
-	move_next_in_path(delta);
-
 	queue_redraw();
 
 func _connect_map() -> void:
@@ -65,12 +63,10 @@ func _calculate_next_nav_path() -> void:
 	next_path_tile = nav_path[0];
 
 func move_next_in_path(delta: float) -> void:
-	if (nav_path.size() == 0): return;
-
 	if (!next_path_tile || _has_reached_path()):
 		_calculate_next_nav_path();
 
-		if (next_path_tile == current_tile_pos):
+		if (next_path_tile == current_tile_pos && nav_path.size() > 1):
 			next_path_tile = nav_path[1];
 		
 	if (next_path_tile):
