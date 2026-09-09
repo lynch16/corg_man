@@ -32,10 +32,12 @@ func _ready() -> void:
 
 func _handle_player_damage(_old_health: float, new_health: float) -> void:
 	# SignalBus._on_player_health_updated(int(new_health));
+	prints("HURT", _old_health, new_health)
 	pass;
 	
 func _die() -> void:
-	var sprite: AnimatedSprite2D = $AnimatedShipSprite2D;
+	print("DIE");
+	var sprite: AnimatedSprite2D = $AnimatedSprite2D;
 	sprite.hide();
 	process_mode = Node.PROCESS_MODE_DISABLED;
 	_notify_death();

@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CombatStats" format=3 uid="uid://dcmq7tlmfu6ie"]
+
+[ext_resource type="Script" uid="uid://wmd6w6j2858o" path="res://Models/EntityModules/Damage/combat_stats.gd" id="1_4ign0"]
+
+[resource]
+script = ExtResource("1_4ign0")
+damage_dealt = 1.0

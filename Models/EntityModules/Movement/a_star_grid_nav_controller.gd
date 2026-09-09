@@ -22,7 +22,8 @@ func _process(delta: float) -> void:
 func _connect_map() -> void:
 	var map := Blackboard.get_map();
 	if (map):
-		map.on_map_generated.connect(_update_tile_map);
+		if (!map.on_map_generated.is_connected(_update_tile_map)):
+			map.on_map_generated.connect(_update_tile_map);
 		_update_tile_map();
 
 func _setup_grid() -> void:
@@ -94,6 +95,8 @@ func _has_reached_path() -> bool:
 
 func _draw() -> void:
 	var map := Blackboard.get_map();
+	if (!map): return;
+
 	var tile_size := map.tile_map_layer.tile_set.tile_size;
 	var half_tile_size := tile_size/2;
 	if (current_tile_pos):

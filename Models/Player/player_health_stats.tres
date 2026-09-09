@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="HealthStats" format=3 uid="uid://cwpyp4d8gta26"]
+
+[ext_resource type="Script" uid="uid://d1adag40dhb61" path="res://Models/EntityModules/Damage/health_stats.gd" id="1_qx83m"]
+
+[resource]
+script = ExtResource("1_qx83m")
+initial_health = 1.0
+metadata/_custom_type_script = "uid://d1adag40dhb61"

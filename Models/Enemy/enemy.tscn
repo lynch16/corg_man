@@ -23,6 +23,7 @@ metadata/_custom_type_script = "uid://d1adag40dhb61"
 [sub_resource type="Resource" id="Resource_eowg7"]
 resource_local_to_scene = true
 script = ExtResource("2_eowg7")
+damage_dealt = 1.0
 faction = 1
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_s2vdc"]

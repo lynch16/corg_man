@@ -23,12 +23,12 @@ faction = 1
 [node name="Level" type="Node2D" unique_id=1265118823]
 script = ExtResource("1_vonw3")
 
-[node name="PlayerSpawn" parent="." unique_id=90593702 instance=ExtResource("2_oi3di")]
-
 [node name="Map" parent="." unique_id=1997149468 instance=ExtResource("2_0b4ue")]
 
-[node name="Enemy" parent="." unique_id=1983692498 instance=ExtResource("4_1ainy")]
+[node name="Enemy" parent="Map" unique_id=1983692498 instance=ExtResource("4_1ainy")]
 health_stats = SubResource("Resource_n6hdu")
 combat_stats = SubResource("Resource_km5ld")
+
+[node name="PlayerSpawn" parent="Map" unique_id=90593702 instance=ExtResource("2_oi3di")]
 
 [node name="HUD" parent="." unique_id=266332138 instance=ExtResource("7_n6hdu")]
