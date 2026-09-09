@@ -15,6 +15,7 @@ enum TileType {
 	Energizer = 3,
 	Door = 4,
 	Blank = 5,
+	Tunnel = 6
 }
 
 ## Generated cells, upscaled to full size
@@ -71,6 +72,8 @@ func generate() -> void:
 				for tile_y in range(cell.height):
 					# Adding 1 to offset top row with row of walls
 					_set_tile_cell(cell.x + tile_x, cell.y + TOP_WALL_ROW_OFFSET + tile_y, cell);
+					if (cell.is_tunnel):
+						_set_tile(cell.x + tile_x, cell.y + TOP_WALL_ROW_OFFSET + tile_y, TileType.Tunnel)
 
 	_set_path_tiles();
 	_extend_tunnels();

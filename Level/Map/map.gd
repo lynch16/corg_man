@@ -1,8 +1,6 @@
 class_name Map
 extends Node
 
-# TODO: Draw target and current tiles for debugging
-
 @export var map_textures: Array[CompressedTexture2D] = [];
 @onready var tile_map_layer: TileMapLayer = $TileMapLayer;
 
@@ -29,14 +27,27 @@ func _generate_map() -> void:
 	var num_full_columns := (num_tile_columns - 2) * 2;
 
 	var wall_tiles: Array[Vector2i] = [];
+	var tunnel_tiles: Array[Vector2i] = [];
+	var pellet_tiles: Array[Vector2i] = [];
+	var energizer_tiles: Array[Vector2i] = [];
 
 	for x in range(num_full_columns):
 		for y in range(num_tile_rows):
 			var tile_type: TileGenerator.TileType = map_gen.tile_generator.tiles[x][y];
-			if (tile_type == TileGenerator.TileType.Wall):
-				wall_tiles.append(Vector2i(x + 1, y + 1));
+			var tile_pos := Vector2i(x + 1, y + 1);
+			match(tile_type):
+				TileGenerator.TileType.Wall:
+					wall_tiles.append(tile_pos);
+				TileGenerator.TileType.Tunnel:
+					tunnel_tiles.append(tile_pos);
+				TileGenerator.TileType.Pellet:
+					pellet_tiles.append(tile_pos);
+				TileGenerator.TileType.Energizer:
+					energizer_tiles.append(tile_pos);
 
 	tile_map_layer.set_cells_terrain_connect(wall_tiles, terrain_set_id, terrain_id);
+	# TODO: Set warp points on tunnel cells
+
 	on_map_generated.emit();
 
 func get_tile_from_position(global_pos: Vector2) -> Vector2i:
