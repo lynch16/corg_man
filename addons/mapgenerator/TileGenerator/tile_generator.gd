@@ -72,8 +72,6 @@ func generate() -> void:
 				for tile_y in range(cell.height):
 					# Adding 1 to offset top row with row of walls
 					_set_tile_cell(cell.x + tile_x, cell.y + TOP_WALL_ROW_OFFSET + tile_y, cell);
-					if (cell.is_tunnel):
-						_set_tile(cell.x + tile_x, cell.y + TOP_WALL_ROW_OFFSET + tile_y, TileType.Tunnel)
 
 	_set_path_tiles();
 	_extend_tunnels();
@@ -125,7 +123,7 @@ func _extend_tunnels() -> void:
 	while (_cell_valid(end_column_cell)):
 		if (end_column_cell.is_tunnel):
 			var y = end_column_cell.y * CellTileResizer.TILE_SCALE + TOP_WALL_ROW_OFFSET;
-			_set_tile(num_tile_columns - 1, y, TileType.Pellet);
+			_set_tile(num_tile_columns - 1, y, TileType.Tunnel);
 			_set_tile(num_tile_columns - 2, y, TileType.Pellet);
 
 		var next_cell_down := end_column_cell.next[CellGenerator.DOWN];
@@ -133,12 +131,6 @@ func _extend_tunnels() -> void:
 			end_column_cell = TileCell.from(next_cell_down);
 		else:
 			end_column_cell = null;
-
-func _fill_unassigned_as_walls() -> void:
-	for y in range(num_tile_rows):
-		for x in range(num_tile_columns):
-			if (_get_tile(x, y) == TileType.Unassigned):
-				_set_tile(x, y, TileType.Wall);
 
 func _fill_walls() -> void:
 	for y in range(num_tile_rows):

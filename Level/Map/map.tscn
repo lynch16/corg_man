@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://btohf7n7svwpn"]
 
-[ext_resource type="Script" uid="uid://chcqc72deg354" path="res://map.gd" id="1_wijl4"]
+[ext_resource type="Script" uid="uid://dedq1wsel4obu" path="res://Level/Map/map.gd" id="1_dbk6w"]
 [ext_resource type="Texture2D" uid="uid://dr86xpe7qfag3" path="res://Assets/Tiles/tilemap-green.png" id="3_e0an3"]
 [ext_resource type="Texture2D" uid="uid://cnxfjajvvcxi6" path="res://Assets/Tiles/tilemap-blue.png" id="4_05x41"]
 [ext_resource type="Texture2D" uid="uid://b3pagknf1ftae" path="res://Assets/Tiles/tilemap-red.png" id="4_p5pve"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://cktvmdei1b0wm" path="res://Assets/Tiles/tilemap-green2.png" id="6_oysan"]
 [ext_resource type="Texture2D" uid="uid://ceuhycc5nheaf" path="res://Assets/Tiles/tilemap-orange.png" id="7_sb2pt"]
 [ext_resource type="Texture2D" uid="uid://dbyd3aukdyv7o" path="res://Assets/Tiles/tilemap-purple.png" id="8_0t07s"]
+[ext_resource type="PackedScene" uid="uid://bmllfnxtxcrse" path="res://Level/Map/TunnelWarp/tunnel_warp.tscn" id="9_rin1n"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_p5pve"]
 texture = ExtResource("3_e0an3")
@@ -315,8 +316,9 @@ custom_data_layer_0/type = 1
 sources/1 = SubResource("TileSetAtlasSource_p5pve")
 
 [node name="Map" type="Node2D" unique_id=1997149468]
-script = ExtResource("1_wijl4")
+script = ExtResource("1_dbk6w")
 map_textures = Array[CompressedTexture2D]([ExtResource("3_e0an3"), ExtResource("4_p5pve"), ExtResource("4_05x41"), ExtResource("5_gqbix"), ExtResource("6_oysan"), ExtResource("7_sb2pt"), ExtResource("8_0t07s")])
+tunnel_warp_scene = ExtResource("9_rin1n")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1334552351]
 tile_set = SubResource("TileSet_6xnif")
